@@ -18,8 +18,6 @@
     <main>
         <section class="viz-container">
             <svg id="barbell-viz" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
-                <line x1="0" y1="150" x2="600" y2="150" stroke="red" opacity="0.1"/>
-                
                 <rect id="bar-shaft" x="0" y="139" width="50" height="22" rx="2" />
 
                 <rect id="bar-collar" x="50" y="130" width="15" height="40" rx="2" />
@@ -31,12 +29,12 @@
         </section>
 
         <section class="info-display">
-            <h2>Total Weight: <span id="total-weight">45</span> lbs</h2>
+            <h2>Total: <span id="total-weight">45</span> lbs</h2>
             <p>Side Load: <span id="side-weight">0</span> lbs</p>
-            <button id="clear-btn">Clear Plates</button>
+            <button id="clear-btn">Clear All</button>
         </section>
 
-        <section class="controls-grid">
+        <section class="controls-grid" id="controls-grid">
             </section>
     </main>
 
