@@ -4,15 +4,17 @@
     --card-bg: #ffffff;
     --accent: #3498db;
     --svg-bar: #999;
+    --modal-bg: rgba(0,0,0,0.5);
     
-    /* UPDATED Color Scheme */
-    --p45: #d32f2f; /* Red */
-    --p35: #1976d2; /* Blue */
-    --p25: #fbc02d; /* Yellow */
-    --p15: #212121; /* Black */
-    --p10: #388e3c; /* Green */
-    --p5:  #616161; /* Dark Gray */
-    --p2_5: #424242; /* Darker Gray */
+    /* COLORS */
+    --c-red: #d32f2f;
+    --c-blue: #1976d2;
+    --c-yellow: #fbc02d;
+    --c-green: #388e3c;
+    --c-white: #f5f5f5; 
+    --c-black: #212121;
+    --c-gray: #616161;
+    --c-lightgray: #9e9e9e;
 }
 
 body.dark {
@@ -21,6 +23,8 @@ body.dark {
     --card-bg: #1e1e1e;
     --accent: #90caf9;
     --svg-bar: #555;
+    --modal-bg: rgba(0,0,0,0.8);
+    --c-white: #eeeeee; /* Slightly dimmer for dark mode eye comfort */
 }
 
 body {
@@ -34,6 +38,7 @@ body {
     min-height: 100vh;
 }
 
+/* Header & Settings Button */
 header {
     display: flex;
     justify-content: space-between;
@@ -43,21 +48,84 @@ header {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-h1 { margin: 0; font-size: 1.5rem; }
-
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    font-family: inherit;
+#settings-btn {
+    background: none;
+    color: var(--text);
+    padding: 5px;
 }
 
-#theme-toggle {
-    background: none;
-    font-size: 1.5rem;
+/* Modal Styling */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--modal-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.modal-content {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.modal-header h3 { margin: 0; }
+#close-modal { font-size: 1.5rem; background: none; color: var(--text); }
+
+.setting-item {
+    margin-bottom: 20px;
+}
+.setting-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+/* Toggle Groups (Segmented Controls) */
+.toggle-group {
+    display: flex;
+    border: 1px solid var(--svg-bar);
+    border-radius: 6px;
+    overflow: hidden;
+}
+.toggle-group button {
+    flex: 1;
+    padding: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 0;
+}
+.toggle-group button.active {
+    background: var(--accent);
+    color: white; /* Active text color */
+}
+.toggle-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--svg-bar);
     color: var(--text);
 }
 
+/* Common Layout */
 main {
     padding: 1rem;
     max-width: 800px;
@@ -66,114 +134,55 @@ main {
     box-sizing: border-box;
 }
 
-/* Visualization Styling */
 .viz-container {
     background: var(--card-bg);
     border-radius: 12px;
     padding: 20px 10px;
     margin-bottom: 1rem;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    overflow: hidden;
-    /* Center the SVG */
-    display: flex;
-    justify-content: center;
+    display: flex; justify-content: center;
 }
+#barbell-viz { width: 100%; height: auto; max-height: 300px; }
+#bar-shaft, #bar-sleeve, #bar-collar { fill: var(--svg-bar); }
 
-#barbell-viz {
-    width: 100%;
-    height: auto;
-    max-height: 300px;
-}
+/* SVG Plate Colors */
+.viz-plate { stroke: rgba(0,0,0,0.2); stroke-width: 1px; }
+.fill-red { fill: var(--c-red); }
+.fill-blue { fill: var(--c-blue); }
+.fill-yellow { fill: var(--c-yellow); }
+.fill-green { fill: var(--c-green); }
+.fill-white { fill: var(--c-white); }
+.fill-black { fill: var(--c-black); }
+.fill-gray  { fill: var(--c-gray); }
+.fill-lightgray { fill: var(--c-lightgray); }
 
-#bar-shaft, #bar-sleeve, #bar-collar {
-    fill: var(--svg-bar);
-}
-
-.viz-plate { stroke: rgba(0,0,0,0.15); stroke-width: 1px; }
-
-/* Map CSS variables to classes for SVG fills */
-.plate-45 { fill: var(--p45); }
-.plate-35 { fill: var(--p35); }
-.plate-25 { fill: var(--p25); }
-.plate-15 { fill: var(--p15); }
-.plate-10 { fill: var(--p10); }
-.plate-5  { fill: var(--p5); }
-.plate-2\.5 { fill: var(--p2_5); }
-
-/* Info Display */
+/* Info & Grid */
 .info-display {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    background: var(--card-bg);
-    padding: 1rem;
-    border-radius: 8px;
+    text-align: center; margin-bottom: 1.5rem;
+    background: var(--card-bg); padding: 1rem; border-radius: 8px;
 }
-
-.info-display h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 2rem;
-    color: var(--text);
-}
-
-#clear-btn {
-    background: #ef5350;
-    color: white;
-    padding: 8px 16px;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-/* Controls Grid */
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
     gap: 12px;
 }
-
-/* Wrapper for the Add/Remove pair */
-.plate-control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-/* Common button styles */
+.plate-control-group { display: flex; flex-direction: column; gap: 4px; }
 .plate-btn, .remove-btn {
-    width: 100%;
-    border-radius: 6px;
+    width: 100%; border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: filter 0.2s, transform 0.1s;
 }
+.plate-btn { padding: 12px 0; font-size: 1.1rem; font-weight: 800; color: white; }
+.remove-btn { padding: 6px 0; background: #e0e0e0; color: #333; font-size: 0.9rem; }
+body.dark .remove-btn { background: #333; color: #fff; }
 
-.plate-btn:active, .remove-btn:active {
-    transform: scale(0.95);
-}
+/* Button Color mappings */
+.btn-red { background-color: var(--c-red); color: white; }
+.btn-blue { background-color: var(--c-blue); color: white; }
+.btn-yellow { background-color: var(--c-yellow); color: black; }
+.btn-green { background-color: var(--c-green); color: white; }
+.btn-white { background-color: var(--c-white); color: black; border: 1px solid #ccc; }
+.btn-black { background-color: var(--c-black); color: white; }
+.btn-gray { background-color: var(--c-gray); color: white; }
+.btn-lightgray { background-color: var(--c-lightgray); color: black; }
 
-/* The Add Button (Top) */
-.plate-btn {
-    padding: 12px 0;
-    font-size: 1.2rem;
-    font-weight: 800; /* Extra bold for readability */
-    color: white; /* Default text color */
-}
-
-/* The Remove Button (Bottom) */
-.remove-btn {
-    padding: 6px 0;
-    background: #e0e0e0;
-    color: #333;
-    font-size: 0.9rem;
-}
-body.dark .remove-btn {
-    background: #333;
-    color: #fff;
-}
-
-/* Specific Colors & High Contrast Text overrides */
-.btn-45 { background-color: var(--p45); color: white; }
-.btn-35 { background-color: var(--p35); color: white; }
-.btn-25 { background-color: var(--p25); color: black; } /* Black text on Yellow */
-.btn-15 { background-color: var(--p15); color: white; }
-.btn-10 { background-color: var(--p10); color: white; }
-.btn-5  { background-color: var(--p5);  color: white; }
-.btn-2\.5 { background-color: var(--p2_5); color: white; }
+.small-text { font-size: 0.8rem; color: var(--svg-bar); text-align: center; margin-top: 10px;}
