@@ -1,0 +1,145 @@
+:root {
+    --bg: #f4f4f9;
+    --text: #333;
+    --card-bg: #ffffff;
+    --accent: #3498db;
+    --svg-bar: #999;
+    /* Plate Colors corresponding to standard coding */
+    --p45: #0d47a1; /* Blue */
+    --p35: #fbc02d; /* Yellow */
+    --p25: #388e3c; /* Green */
+    --p15: #5d4037; /* Brownish/generic */
+    --p10: #424242; /* Dark Grey/Black */
+    --p5: #e0e0e0; /* Light Grey */
+    --p2_5: #cfd8dc; /* Very Light Grey */
+}
+
+body.dark {
+    --bg: #121212;
+    --text: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --accent: #90caf9;
+    --svg-bar: #555;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--card-bg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1 { margin: 0; font-size: 1.5rem; }
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+#theme-toggle {
+    background: none;
+    font-size: 1.5rem;
+}
+
+main {
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Visualization Styling */
+.viz-container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+#barbell-viz {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    display: block;
+}
+
+#bar-shaft, #bar-sleeve, #bar-collar {
+    fill: var(--svg-bar);
+}
+
+/* SVG Plate styling */
+.viz-plate { stroke: rgba(0,0,0,0.2); stroke-width: 1px; }
+.plate-45 { fill: var(--p45); }
+.plate-35 { fill: var(--p35); }
+.plate-25 { fill: var(--p25); }
+.plate-15 { fill: var(--p15); }
+.plate-10 { fill: var(--p10); }
+.plate-5 { fill: var(--p5); }
+.plate-2.5 { fill: var(--p2_5); }
+
+
+/* Info Display */
+.info-display {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.info-display h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: var(--accent);
+}
+
+#clear-btn {
+    background: #ef5350;
+    color: white;
+    padding: 8px 16px;
+    margin-top: 10px;
+}
+
+/* Controls Grid */
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+.plate-btn {
+    padding: 15px 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    transition: transform 0.1s;
+}
+.plate-btn:active { transform: scale(0.96); }
+/* Match buttons to plate colors */
+.btn-45 { background-color: var(--p45); }
+.btn-35 { background-color: var(--p35); }
+.btn-25 { background-color: var(--p25); }
+.btn-15 { background-color: var(--p15); }
+.btn-10 { background-color: var(--p10); }
+.btn-5 { background-color: var(--p5); color: #333;}
+.btn-2\.5 { background-color: var(--p2_5); color: #333; }

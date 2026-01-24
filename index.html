@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbell Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <header>
+        <h1>BarLoader</h1>
+        <button id="theme-toggle" aria-label="Toggle Dark Mode">🌓</button>
+    </header>
+
+    <main>
+        <section class="viz-container">
+            <svg id="barbell-viz" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+                <line x1="0" y1="150" x2="600" y2="150" stroke="red" opacity="0.1"/>
+                
+                <rect id="bar-shaft" x="0" y="139" width="50" height="22" rx="2" />
+
+                <rect id="bar-collar" x="50" y="130" width="15" height="40" rx="2" />
+
+                <rect id="bar-sleeve" x="65" y="130" width="330" height="40" rx="4" />
+                
+                <g id="plate-group"></g>
+            </svg>
+        </section>
+
+        <section class="info-display">
+            <h2>Total Weight: <span id="total-weight">45</span> lbs</h2>
+            <p>Side Load: <span id="side-weight">0</span> lbs</p>
+            <button id="clear-btn">Clear Plates</button>
+        </section>
+
+        <section class="controls-grid">
+            </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
