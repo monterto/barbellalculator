@@ -4,14 +4,15 @@
     --card-bg: #ffffff;
     --accent: #3498db;
     --svg-bar: #999;
-    /* Plate Colors corresponding to standard coding */
-    --p45: #0d47a1; /* Blue */
-    --p35: #fbc02d; /* Yellow */
-    --p25: #388e3c; /* Green */
-    --p15: #5d4037; /* Brownish/generic */
-    --p10: #424242; /* Dark Grey/Black */
-    --p5: #e0e0e0; /* Light Grey */
-    --p2_5: #cfd8dc; /* Very Light Grey */
+    
+    /* UPDATED Color Scheme */
+    --p45: #d32f2f; /* Red */
+    --p35: #1976d2; /* Blue */
+    --p25: #fbc02d; /* Yellow */
+    --p15: #212121; /* Black */
+    --p10: #388e3c; /* Green */
+    --p5:  #616161; /* Dark Gray */
+    --p2_5: #424242; /* Darker Gray */
 }
 
 body.dark {
@@ -24,7 +25,7 @@ body.dark {
 
 body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg);
     color: var(--text);
     transition: background-color 0.3s, color 0.3s;
@@ -54,6 +55,7 @@ button {
 #theme-toggle {
     background: none;
     font-size: 1.5rem;
+    color: var(--text);
 }
 
 main {
@@ -72,29 +74,31 @@ main {
     margin-bottom: 1rem;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     overflow: hidden;
+    /* Center the SVG */
+    display: flex;
+    justify-content: center;
 }
 
 #barbell-viz {
     width: 100%;
     height: auto;
     max-height: 300px;
-    display: block;
 }
 
 #bar-shaft, #bar-sleeve, #bar-collar {
     fill: var(--svg-bar);
 }
 
-/* SVG Plate styling */
-.viz-plate { stroke: rgba(0,0,0,0.2); stroke-width: 1px; }
+.viz-plate { stroke: rgba(0,0,0,0.15); stroke-width: 1px; }
+
+/* Map CSS variables to classes for SVG fills */
 .plate-45 { fill: var(--p45); }
 .plate-35 { fill: var(--p35); }
 .plate-25 { fill: var(--p25); }
 .plate-15 { fill: var(--p15); }
 .plate-10 { fill: var(--p10); }
-.plate-5 { fill: var(--p5); }
-.plate-2.5 { fill: var(--p2_5); }
-
+.plate-5  { fill: var(--p5); }
+.plate-2\.5 { fill: var(--p2_5); }
 
 /* Info Display */
 .info-display {
@@ -108,7 +112,7 @@ main {
 .info-display h2 {
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
-    color: var(--accent);
+    color: var(--text);
 }
 
 #clear-btn {
@@ -116,30 +120,60 @@ main {
     color: white;
     padding: 8px 16px;
     margin-top: 10px;
+    font-weight: bold;
 }
 
 /* Controls Grid */
 .controls-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 12px;
 }
 
-.plate-btn {
-    padding: 15px 5px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: white;
-    border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    transition: transform 0.1s;
+/* Wrapper for the Add/Remove pair */
+.plate-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
-.plate-btn:active { transform: scale(0.96); }
-/* Match buttons to plate colors */
-.btn-45 { background-color: var(--p45); }
-.btn-35 { background-color: var(--p35); }
-.btn-25 { background-color: var(--p25); }
-.btn-15 { background-color: var(--p15); }
-.btn-10 { background-color: var(--p10); }
-.btn-5 { background-color: var(--p5); color: #333;}
-.btn-2\.5 { background-color: var(--p2_5); color: #333; }
+
+/* Common button styles */
+.plate-btn, .remove-btn {
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: filter 0.2s, transform 0.1s;
+}
+
+.plate-btn:active, .remove-btn:active {
+    transform: scale(0.95);
+}
+
+/* The Add Button (Top) */
+.plate-btn {
+    padding: 12px 0;
+    font-size: 1.2rem;
+    font-weight: 800; /* Extra bold for readability */
+    color: white; /* Default text color */
+}
+
+/* The Remove Button (Bottom) */
+.remove-btn {
+    padding: 6px 0;
+    background: #e0e0e0;
+    color: #333;
+    font-size: 0.9rem;
+}
+body.dark .remove-btn {
+    background: #333;
+    color: #fff;
+}
+
+/* Specific Colors & High Contrast Text overrides */
+.btn-45 { background-color: var(--p45); color: white; }
+.btn-35 { background-color: var(--p35); color: white; }
+.btn-25 { background-color: var(--p25); color: black; } /* Black text on Yellow */
+.btn-15 { background-color: var(--p15); color: white; }
+.btn-10 { background-color: var(--p10); color: white; }
+.btn-5  { background-color: var(--p5);  color: white; }
+.btn-2\.5 { background-color: var(--p2_5); color: white; }
