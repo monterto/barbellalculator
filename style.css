@@ -1,188 +1,46 @@
 :root {
-    --bg: #f4f4f9;
-    --text: #333;
-    --card-bg: #ffffff;
-    --accent: #3498db;
-    --svg-bar: #999;
-    --modal-bg: rgba(0,0,0,0.5);
-    
-    /* COLORS */
-    --c-red: #d32f2f;
-    --c-blue: #1976d2;
-    --c-yellow: #fbc02d;
-    --c-green: #388e3c;
-    --c-white: #f5f5f5; 
-    --c-black: #212121;
-    --c-gray: #616161;
-    --c-lightgray: #9e9e9e;
+    --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21;
+    --accent: #1a73e8; --border: #ddd;
+    --red: #e53935; --blue: #1e88e5; --yellow: #fdd835; 
+    --green: #43a047; --white: #fafafa; --black: #263238;
 }
 
 body.dark {
-    --bg: #121212;
-    --text: #e0e0e0;
-    --card-bg: #1e1e1e;
-    --accent: #90caf9;
-    --svg-bar: #555;
-    --modal-bg: rgba(0,0,0,0.8);
-    --c-white: #eeeeee; /* Slightly dimmer for dark mode eye comfort */
+    --bg: #121212; --card: #1e1e1e; --text: #e4e6eb; --border: #333;
 }
 
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    transition: background-color 0.3s, color 0.3s;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow-x: hidden;}
+header { padding: 15px 20px; display: flex; justify-content: space-between; background: var(--card); border-bottom: 1px solid var(--border); }
+.logo { font-weight: 800; }
+.logo span { color: var(--accent); }
 
-/* Header & Settings Button */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: var(--card-bg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+.viz-card { background: var(--card); margin: 15px; border-radius: 16px; padding: 20px; display: flex; justify-content: center; }
+.target-input-card { background: var(--card); margin: 0 15px 15px; padding: 15px; border-radius: 12px; }
+.input-group { display: flex; gap: 10px; margin-top: 5px; }
+.input-group input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 1.1rem; }
+#calc-btn { background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; padding: 0 15px; }
 
-#settings-btn {
-    background: none;
-    color: var(--text);
-    padding: 5px;
-}
+.stats-container { text-align: center; margin-bottom: 20px; }
+.main-stat { font-size: 3rem; font-weight: 800; color: var(--accent); }
 
-/* Modal Styling */
-.modal {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--modal-bg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 1;
-    transition: opacity 0.2s;
-}
-.modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-.modal-content {
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.modal-header h3 { margin: 0; }
-#close-modal { font-size: 1.5rem; background: none; color: var(--text); }
+.controls-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 15px 30px; }
+.plate-group { display: flex; flex-direction: column; gap: 4px; }
+.plate-btn { padding: 12px 0; border: none; border-radius: 8px; font-weight: 800; color: #fff; }
+.remove-btn { background: var(--border); border: none; padding: 4px; border-radius: 4px; color: var(--text); font-size: 0.7rem; opacity: 0.8; }
 
-.setting-item {
-    margin-bottom: 20px;
-}
-.setting-item label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    color: var(--accent);
-}
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.hidden { display: none; }
+.modal-content { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; }
+.setting-item { margin-top: 20px; }
+.segmented-control { display: flex; background: var(--bg); padding: 4px; border-radius: 8px; gap: 4px; }
+.segmented-control button { flex: 1; border: none; padding: 8px; background: none; color: var(--text); border-radius: 6px; }
+.segmented-control button.active { background: var(--accent); color: white; }
 
-/* Toggle Groups (Segmented Controls) */
-.toggle-group {
-    display: flex;
-    border: 1px solid var(--svg-bar);
-    border-radius: 6px;
-    overflow: hidden;
-}
-.toggle-group button {
-    flex: 1;
-    padding: 10px;
-    background: var(--card-bg);
-    color: var(--text);
-    border-radius: 0;
-}
-.toggle-group button.active {
-    background: var(--accent);
-    color: white; /* Active text color */
-}
-.toggle-btn {
-    width: 100%;
-    padding: 10px;
-    background: var(--card-bg);
-    border: 1px solid var(--svg-bar);
-    color: var(--text);
-}
+.inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.inv-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 8px; border-radius: 6px; }
+.inv-item input { width: 40px; background: var(--card); border: 1px solid var(--border); color: var(--text); text-align: center; border-radius: 4px; }
+.full-btn { width: 100%; padding: 12px; margin-top: 10px; background: var(--border); border: none; border-radius: 8px; color: var(--text); font-weight: 600; }
+.small-note { font-size: 0.7rem; opacity: 0.6; margin-top: 4px; }
 
-/* Common Layout */
-main {
-    padding: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.viz-container {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    display: flex; justify-content: center;
-}
-#barbell-viz { width: 100%; height: auto; max-height: 300px; }
-#bar-shaft, #bar-sleeve, #bar-collar { fill: var(--svg-bar); }
-
-/* SVG Plate Colors */
-.viz-plate { stroke: rgba(0,0,0,0.2); stroke-width: 1px; }
-.fill-red { fill: var(--c-red); }
-.fill-blue { fill: var(--c-blue); }
-.fill-yellow { fill: var(--c-yellow); }
-.fill-green { fill: var(--c-green); }
-.fill-white { fill: var(--c-white); }
-.fill-black { fill: var(--c-black); }
-.fill-gray  { fill: var(--c-gray); }
-.fill-lightgray { fill: var(--c-lightgray); }
-
-/* Info & Grid */
-.info-display {
-    text-align: center; margin-bottom: 1.5rem;
-    background: var(--card-bg); padding: 1rem; border-radius: 8px;
-}
-.controls-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 12px;
-}
-.plate-control-group { display: flex; flex-direction: column; gap: 4px; }
-.plate-btn, .remove-btn {
-    width: 100%; border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.plate-btn { padding: 12px 0; font-size: 1.1rem; font-weight: 800; color: white; }
-.remove-btn { padding: 6px 0; background: #e0e0e0; color: #333; font-size: 0.9rem; }
-body.dark .remove-btn { background: #333; color: #fff; }
-
-/* Button Color mappings */
-.btn-red { background-color: var(--c-red); color: white; }
-.btn-blue { background-color: var(--c-blue); color: white; }
-.btn-yellow { background-color: var(--c-yellow); color: black; }
-.btn-green { background-color: var(--c-green); color: white; }
-.btn-white { background-color: var(--c-white); color: black; border: 1px solid #ccc; }
-.btn-black { background-color: var(--c-black); color: white; }
-.btn-gray { background-color: var(--c-gray); color: white; }
-.btn-lightgray { background-color: var(--c-lightgray); color: black; }
-
-.small-text { font-size: 0.8rem; color: var(--svg-bar); text-align: center; margin-top: 10px;}
+.plate-label { font-size: 9px; font-weight: bold; fill: white; text-anchor: middle; pointer-events: none;}
+.label-dark { fill: black; }
