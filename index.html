@@ -16,21 +16,20 @@
 
     <main>
         <div class="viz-card">
-            <svg id="barbell-viz" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-                <g id="barbell-group">
-                    <rect id="bar-shaft" x="0" y="114" width="50" height="22" rx="2" fill="#888" />
-                    <rect id="bar-collar" x="50" y="105" width="15" height="40" rx="2" fill="#777" />
-                    <rect id="bar-sleeve" x="65" y="105" width="300" height="40" rx="4" fill="#999" />
-                    <g id="plate-group"></g>
+            <svg id="barbell-viz" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+                <g id="bar-static-parts">
+                    <rect x="50" y="89" width="400" height="22" rx="2" fill="#888" />
+                    <rect id="collar-left" x="140" y="75" width="15" height="50" rx="2" fill="#666" />
                 </g>
+                <g id="plate-group"></g>
             </svg>
         </div>
 
         <div class="target-input-card">
-            <label for="target-weight-input">Target Weight</label>
+            <label>Target Weight</label>
             <div class="input-group">
-                <input type="number" id="target-weight-input" placeholder="0.0">
-                <button id="calc-btn">Load Plates</button>
+                <input type="number" id="target-weight-input" placeholder="Enter Weight" inputmode="decimal">
+                <button id="calc-btn">Load</button>
             </div>
         </div>
 
@@ -52,7 +51,6 @@
                 <h3>Settings</h3>
                 <button id="close-modal">&times;</button>
             </div>
-            
             <div class="setting-item">
                 <label>Unit System</label>
                 <div class="segmented-control">
@@ -60,28 +58,20 @@
                     <button class="unit-select" data-unit="kg">KG</button>
                 </div>
             </div>
-
             <div class="setting-item">
-                <label>Barbell Weight</label>
+                <label>Barbell Type</label>
                 <div class="segmented-control">
                     <button class="bar-select" data-bar="men">Men's</button>
                     <button class="bar-select" data-bar="women">Women's</button>
                 </div>
             </div>
-
             <div class="setting-item">
-                <label>Inventory (Plates per side)</label>
-                <div id="inventory-list" class="inventory-grid">
-                    </div>
-                <p class="small-note">Set to 99 for infinite</p>
+                <label>Inventory (Per Side)</label>
+                <div id="inventory-list" class="inventory-grid"></div>
             </div>
-
-            <div class="setting-item">
-                <button id="theme-toggle" class="full-btn">Toggle Dark Mode</button>
-            </div>
+            <button id="theme-toggle" class="full-btn">Toggle Dark Mode</button>
         </div>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>
