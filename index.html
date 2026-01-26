@@ -2,73 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbell Visualizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BarLoader Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#1a73e8">
 </head>
 <body>
     <header>
-        <h1>BarLoader</h1>
-        <button id="settings-btn" aria-label="Open Settings">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-            </svg>
-        </button>
+        <div class="logo">BarLoader<span>Pro</span></div>
+        <button id="settings-btn" class="icon-btn">⚙️</button>
     </header>
 
     <main>
-        <section class="viz-container">
-            <svg id="barbell-viz" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
-                <rect id="bar-shaft" x="0" y="139" width="50" height="22" rx="2" />
-                <rect id="bar-collar" x="50" y="130" width="15" height="40" rx="2" />
-                <rect id="bar-sleeve" x="65" y="130" width="330" height="40" rx="4" />
-                <g id="plate-group"></g>
+        <div class="viz-card">
+            <svg id="barbell-viz" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+                <g id="barbell-group">
+                    <rect id="bar-shaft" x="0" y="114" width="50" height="22" rx="2" fill="#888" />
+                    <rect id="bar-collar" x="50" y="105" width="15" height="40" rx="2" fill="#777" />
+                    <rect id="bar-sleeve" x="65" y="105" width="300" height="40" rx="4" fill="#999" />
+                    <g id="plate-group"></g>
+                </g>
             </svg>
-        </section>
+        </div>
 
-        <section class="info-display">
-            <h2>Total: <span id="total-weight">45</span> <span id="unit-label">lbs</span></h2>
-            <p>Side Load: <span id="side-weight">0</span> <span id="unit-label-sm">lbs</span></p>
-            <button id="clear-btn">Clear All</button>
-        </section>
+        <div class="target-input-card">
+            <label for="target-weight-input">Target Weight</label>
+            <div class="input-group">
+                <input type="number" id="target-weight-input" placeholder="0.0">
+                <button id="calc-btn">Load Plates</button>
+            </div>
+        </div>
 
-        <section class="controls-grid" id="controls-grid">
-            </section>
+        <div class="stats-container">
+            <div class="main-stat">
+                <span id="total-weight">45.0</span>
+                <small id="unit-label">lbs</small>
+            </div>
+            <div class="sub-stat">Side: <span id="side-weight">0.0</span> <span class="unit-sm">lbs</span></div>
+            <button id="clear-btn">Clear Bar</button>
+        </div>
+
+        <div class="controls-grid" id="controls-grid"></div>
     </main>
 
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Settings</h3>
-                <button id="close-modal" aria-label="Close">&times;</button>
+                <button id="close-modal">&times;</button>
             </div>
             
             <div class="setting-item">
-                <label>Theme</label>
-                <button id="theme-toggle" class="toggle-btn">Dark Mode: Off</button>
-            </div>
-
-            <div class="setting-item">
-                <label>Units</label>
-                <div class="toggle-group">
-                    <button class="unit-select active" data-unit="lbs">LBS</button>
-                    <button class="unit-select" data-unit="kg">KG (Olympic)</button>
+                <label>Unit System</label>
+                <div class="segmented-control">
+                    <button class="unit-select" data-unit="lbs">LBS</button>
+                    <button class="unit-select" data-unit="kg">KG</button>
                 </div>
             </div>
 
             <div class="setting-item">
-                <label>Bar Type</label>
-                <div class="toggle-group">
-                    <button class="bar-select active" data-bar="men">Standard/Men's</button>
+                <label>Barbell Weight</label>
+                <div class="segmented-control">
+                    <button class="bar-select" data-bar="men">Men's</button>
                     <button class="bar-select" data-bar="women">Women's</button>
                 </div>
             </div>
-            
-            <div class="modal-footer">
-                <p class="small-text">Men's: 45lb / 20kg<br>Women's: 33lb / 15kg</p>
+
+            <div class="setting-item">
+                <label>Inventory (Plates per side)</label>
+                <div id="inventory-list" class="inventory-grid">
+                    </div>
+                <p class="small-note">Set to 99 for infinite</p>
+            </div>
+
+            <div class="setting-item">
+                <button id="theme-toggle" class="full-btn">Toggle Dark Mode</button>
             </div>
         </div>
     </div>
