@@ -1,281 +1,198 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- Configuration Data ---
-    const CONFIG = {
+    const DATA = {
         lbs: {
             bar: { men: 45, women: 33 },
-            // Colors: Red(45), Blue(35), Yellow(25), Black(15), Green(10)
             plates: {
-                45:  { dia: 17.71, thick: 1.45, colorClass: 'fill-red', btnClass: 'btn-red' },
-                35:  { dia: 14.13, thick: 1.33, colorClass: 'fill-blue', btnClass: 'btn-blue' },
-                25:  { dia: 10.94, thick: 1.41, colorClass: 'fill-yellow', btnClass: 'btn-yellow' },
-                15:  { dia: 9.01,  thick: 0.88, colorClass: 'fill-black', btnClass: 'btn-black' },
-                10:  { dia: 9.01,  thick: 0.88, colorClass: 'fill-green', btnClass: 'btn-green' },
-                5:   { dia: 7.91,  thick: 0.55, colorClass: 'fill-gray', btnClass: 'btn-gray' },
-                2.5: { dia: 6.45,  thick: 0.43, colorClass: 'fill-lightgray', btnClass: 'btn-lightgray' }
+                45: { dia: 17.7, thick: 1.5, color: 'var(--red)', darkTxt: false },
+                35: { dia: 14.1, thick: 1.3, color: 'var(--blue)', darkTxt: false },
+                25: { dia: 10.9, thick: 1.4, color: 'var(--yellow)', darkTxt: true },
+                15: { dia: 9.0, thick: 0.9, color: 'var(--black)', darkTxt: false },
+                10: { dia: 9.0, thick: 0.8, color: 'var(--green)', darkTxt: false },
+                5: { dia: 7.9, thick: 0.6, color: 'var(--white)', darkTxt: true },
+                2.5: { dia: 6.5, thick: 0.5, color: '#666', darkTxt: false }
             },
-            weights: [45, 35, 25, 15, 10, 5, 2.5]
+            list: [45, 35, 25, 15, 10, 5, 2.5]
         },
         kg: {
             bar: { men: 20, women: 15 },
-            // IWF Colors: Red(25), Blue(20), Yellow(15), Green(10), White(5)
             plates: {
-                25:   { dia: 17.71, thick: 1.50, colorClass: 'fill-red', btnClass: 'btn-red' },
-                20:   { dia: 17.71, thick: 1.30, colorClass: 'fill-blue', btnClass: 'btn-blue' },
-                15:   { dia: 15.75, thick: 1.10, colorClass: 'fill-yellow', btnClass: 'btn-yellow' },
-                10:   { dia: 12.60, thick: 0.90, colorClass: 'fill-green', btnClass: 'btn-green' },
-                5:    { dia: 9.05,  thick: 0.80, colorClass: 'fill-white', btnClass: 'btn-white' },
-                2.5:  { dia: 7.48,  thick: 0.60, colorClass: 'fill-black', btnClass: 'btn-black' },
-                2:    { dia: 7.00,  thick: 0.50, colorClass: 'fill-gray', btnClass: 'btn-gray' },
-                1.5:  { dia: 6.50,  thick: 0.45, colorClass: 'fill-gray', btnClass: 'btn-gray' },
-                1:    { dia: 6.00,  thick: 0.40, colorClass: 'fill-lightgray', btnClass: 'btn-lightgray' },
-                0.5:  { dia: 5.31,  thick: 0.35, colorClass: 'fill-lightgray', btnClass: 'btn-lightgray' }
+                25: { dia: 17.7, thick: 1.5, color: 'var(--red)', darkTxt: false },
+                20: { dia: 17.7, thick: 1.3, color: 'var(--blue)', darkTxt: false },
+                15: { dia: 15.7, thick: 1.1, color: 'var(--yellow)', darkTxt: true },
+                10: { dia: 12.6, thick: 0.9, color: 'var(--green)', darkTxt: false },
+                5: { dia: 9.0, thick: 0.8, color: 'var(--white)', darkTxt: true },
+                2.5: { dia: 7.5, thick: 0.6, color: '#222', darkTxt: false },
+                1.25: { dia: 6.5, thick: 0.5, color: '#555', darkTxt: false }
             },
-            weights: [25, 20, 15, 10, 5, 2.5, 2, 1.5, 1, 0.5]
+            list: [25, 20, 15, 10, 5, 2.5, 1.25]
         }
     };
 
-    // --- State ---
-    let appState = {
-        unit: 'lbs',      // 'lbs' or 'kg'
-        barType: 'men',   // 'men' or 'women'
-        theme: 'light',
-        platesOnOneSide: [] 
+    let state = {
+        unit: 'lbs', bar: 'men', theme: 'light', plates: [],
+        inventory: {
+            lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
+            kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
+        }
     };
 
-    // --- DOM Elements ---
-    const els = {
-        totalWeight: document.getElementById('total-weight'),
-        sideWeight: document.getElementById('side-weight'),
-        unitLabels: document.querySelectorAll('#unit-label, #unit-label-sm'),
-        controlsGrid: document.getElementById('controls-grid'),
-        plateGroup: document.getElementById('plate-group'),
-        clearBtn: document.getElementById('clear-btn'),
-        // Settings
-        settingsBtn: document.getElementById('settings-btn'),
-        modal: document.getElementById('settings-modal'),
-        closeModal: document.getElementById('close-modal'),
-        themeToggle: document.getElementById('theme-toggle'),
-        unitBtns: document.querySelectorAll('.unit-select'),
-        barBtns: document.querySelectorAll('.bar-select')
-    };
-
-    // --- Initialization ---
-    init();
-
-    function init() {
-        loadSettings();
-        applyTheme();
-        initListeners();
-        renderControls(); // Draws buttons based on units
-        updateUI();       // Calculates math and draws SVG
-    }
-
-    // --- Core Logic ---
-
-    function getPlateConfig() {
-        return CONFIG[appState.unit].plates;
-    }
-
-    function getBarWeight() {
-        return CONFIG[appState.unit].bar[appState.barType];
-    }
-
-    function addPlate(weight) {
-        const plates = getPlateConfig();
-        const maxLen = 16.5; // sleeve length in inches (approx same for kg bars)
-        const scale = 1; // thickness already in inches in config
-        
-        // Check thickness
-        const currentThick = appState.platesOnOneSide.reduce((acc, w) => acc + plates[w].thick, 0);
-        if (currentThick + plates[weight].thick > maxLen) {
-            alert("Sleeve is full!");
-            return;
+    // --- Persistence ---
+    function save() { localStorage.setItem('barLoaderState', JSON.stringify(state)); }
+    function load() {
+        const saved = localStorage.getItem('barLoaderState');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed };
         }
-
-        appState.platesOnOneSide.push(weight);
-        appState.platesOnOneSide.sort((a, b) => b - a); // Keep heavy inside
-        updateUI();
-    }
-
-    function removePlate(weight) {
-        const idx = appState.platesOnOneSide.indexOf(weight);
-        if (idx > -1) {
-            appState.platesOnOneSide.splice(idx, 1);
-            appState.platesOnOneSide.sort((a, b) => b - a);
-            updateUI();
-        }
+        document.body.className = state.theme;
+        refreshSettingsUI();
     }
 
     function updateUI() {
-        // 1. Math
-        const sideTotal = appState.platesOnOneSide.reduce((acc, w) => acc + w, 0);
-        const barWeight = getBarWeight();
-        const total = barWeight + (sideTotal * 2);
+        const config = DATA[state.unit];
+        const barWeight = config.bar[state.bar];
+        const sideWeight = state.plates.reduce((a, b) => a + b, 0);
+        const total = barWeight + (sideWeight * 2);
 
-        // 2. Text
-        els.totalWeight.textContent = total % 1 !== 0 ? total.toFixed(1) : total;
-        els.sideWeight.textContent = sideTotal % 1 !== 0 ? sideTotal.toFixed(1) : sideTotal;
-        
-        // Update unit labels text
-        els.unitLabels.forEach(el => el.textContent = appState.unit);
-
-        // 3. SVG Drawing
-        drawBar();
+        document.getElementById('total-weight').textContent = total.toFixed(1);
+        document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
+        document.getElementById('unit-label').textContent = state.unit;
+        renderPlates();
+        save();
     }
 
-    function drawBar() {
-        const plates = getPlateConfig();
-        els.plateGroup.innerHTML = '';
-        
-        let currentX = 65; // Sleeve start X
-        const centerY = 150;
-        const scaleFactor = 20; // visual scale
+    function renderPlates() {
+        const g = document.getElementById('plate-group');
+        g.innerHTML = '';
+        const config = DATA[state.unit].plates;
+        let x = 65;
 
-        appState.platesOnOneSide.forEach(weight => {
-            const data = plates[weight];
-            const w = data.thick * scaleFactor;
-            const h = data.dia * scaleFactor;
-            const y = centerY - (h / 2);
+        state.plates.forEach(w => {
+            const p = config[w];
+            const svgW = p.thick * 18;
+            const svgH = p.dia * 10;
+            const y = 125 - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", currentX);
-            rect.setAttribute("y", y);
-            rect.setAttribute("width", w);
-            rect.setAttribute("height", h);
-            rect.setAttribute("rx", "2");
-            rect.setAttribute("class", `viz-plate ${data.colorClass}`);
-            
-            els.plateGroup.appendChild(rect);
-            currentX += w + 1; // 1 unit gap
+            rect.setAttribute("x", x); rect.setAttribute("y", y);
+            rect.setAttribute("width", svgW); rect.setAttribute("height", svgH);
+            rect.setAttribute("fill", p.color); rect.setAttribute("rx", 2);
+            rect.setAttribute("stroke", "rgba(0,0,0,0.3)");
+            g.appendChild(rect);
+
+            const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            txt.setAttribute("x", x + (svgW / 2)); txt.setAttribute("y", 128);
+            txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
+            txt.textContent = w;
+            g.appendChild(txt);
+            x += svgW + 1;
         });
+
+        const totalWidth = x;
+        document.getElementById('barbell-group').setAttribute("transform", `translate(${(500 - totalWidth) / 2}, 0)`);
     }
 
-    function renderControls() {
-        els.controlsGrid.innerHTML = '';
-        const weightList = CONFIG[appState.unit].weights;
-        const plateConf = getPlateConfig();
-
-        weightList.forEach(w => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'plate-control-group';
-
-            // Add Button
+    function buildControls() {
+        const grid = document.getElementById('controls-grid');
+        grid.innerHTML = '';
+        DATA[state.unit].list.forEach(w => {
+            const container = document.createElement('div');
+            container.className = 'plate-group';
             const addBtn = document.createElement('button');
-            addBtn.innerText = w;
-            addBtn.className = `plate-btn ${plateConf[w].btnClass}`;
-            addBtn.onclick = () => addPlate(w);
+            addBtn.className = 'plate-btn';
+            addBtn.style.backgroundColor = DATA[state.unit].plates[w].color;
+            if(DATA[state.unit].plates[w].darkTxt) addBtn.style.color = '#000';
+            addBtn.textContent = w;
+            addBtn.onclick = () => { state.plates.push(w); state.plates.sort((a,b)=>b-a); updateUI(); };
 
-            // Remove Button
             const remBtn = document.createElement('button');
-            remBtn.innerHTML = '▼';
             remBtn.className = 'remove-btn';
-            remBtn.onclick = () => removePlate(w);
+            remBtn.textContent = 'Remove';
+            remBtn.onclick = () => { const i = state.plates.indexOf(w); if(i > -1) { state.plates.splice(i, 1); updateUI(); } };
 
-            wrapper.append(addBtn, remBtn);
-            els.controlsGrid.appendChild(wrapper);
+            container.append(addBtn, remBtn);
+            grid.appendChild(container);
         });
     }
 
-    // --- Settings & Persistence ---
-
-    function loadSettings() {
-        const saved = localStorage.getItem('barcalc-settings');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            appState.unit = parsed.unit || 'lbs';
-            appState.barType = parsed.barType || 'men';
-            appState.theme = parsed.theme || 'light';
-        }
-        updateSettingsUI();
-    }
-
-    function saveSettings() {
-        localStorage.setItem('barcalc-settings', JSON.stringify({
-            unit: appState.unit,
-            barType: appState.barType,
-            theme: appState.theme
-        }));
-    }
-
-    function updateSettingsUI() {
-        // Theme Button Text
-        els.themeToggle.innerText = `Dark Mode: ${appState.theme === 'dark' ? 'On' : 'Off'}`;
+    function renderInventorySettings() {
+        const list = document.getElementById('inventory-list');
+        list.innerHTML = '';
+        const currentInv = state.inventory[state.unit];
         
-        // Unit Buttons Active State
-        els.unitBtns.forEach(btn => {
-            if(btn.dataset.unit === appState.unit) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-
-        // Bar Buttons Active State
-        els.barBtns.forEach(btn => {
-            if(btn.dataset.bar === appState.barType) btn.classList.add('active');
-            else btn.classList.remove('active');
+        DATA[state.unit].list.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'inv-item';
+            div.innerHTML = `<span>${w} ${state.unit}</span>`;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = currentInv[w];
+            input.onchange = (e) => {
+                state.inventory[state.unit][w] = parseInt(e.target.value) || 0;
+                save();
+            };
+            div.appendChild(input);
+            list.appendChild(div);
         });
     }
 
-    function applyTheme() {
-        if (appState.theme === 'dark') document.body.classList.add('dark');
-        else document.body.classList.remove('dark');
+    function autoLoad() {
+        const target = parseFloat(document.getElementById('target-weight-input').value);
+        const config = DATA[state.unit];
+        const barWeight = config.bar[state.bar];
+        if (isNaN(target) || target < barWeight) return;
+
+        let remaining = (target - barWeight) / 2;
+        const newPlates = [];
+        const tempInv = { ...state.inventory[state.unit] };
+
+        config.list.forEach(w => {
+            while (remaining >= w && tempInv[w] > 0) {
+                newPlates.push(w);
+                remaining = Math.round((remaining - w) * 100) / 100;
+                tempInv[w]--;
+            }
+        });
+        state.plates = newPlates;
+        updateUI();
     }
 
-    // --- Event Listeners ---
+    function refreshSettingsUI() {
+        document.querySelectorAll('.unit-select').forEach(b => b.classList.toggle('active', b.dataset.unit === state.unit));
+        document.querySelectorAll('.bar-select').forEach(b => b.classList.toggle('active', b.dataset.bar === state.bar));
+        renderInventorySettings();
+    }
 
-    function initListeners() {
-        // Clear
-        els.clearBtn.onclick = () => {
-            appState.platesOnOneSide = [];
+    // --- Listeners ---
+    document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
+    document.getElementById('close-modal').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
+    document.getElementById('calc-btn').onclick = autoLoad;
+    document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
+    document.getElementById('theme-toggle').onclick = () => {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        document.body.className = state.theme;
+        save();
+    };
+
+    document.querySelectorAll('.unit-select').forEach(btn => {
+        btn.onclick = (e) => {
+            state.unit = e.target.dataset.unit;
+            state.plates = [];
+            buildControls();
+            refreshSettingsUI();
             updateUI();
         };
-
-        // Modal Open/Close
-        els.settingsBtn.onclick = () => els.modal.classList.remove('hidden');
-        els.closeModal.onclick = () => els.modal.classList.add('hidden');
-        
-        // Close modal if clicking outside content
-        els.modal.onclick = (e) => {
-            if (e.target === els.modal) els.modal.classList.add('hidden');
-        };
-
-        // Theme Toggle
-        els.themeToggle.onclick = () => {
-            appState.theme = appState.theme === 'light' ? 'dark' : 'light';
-            applyTheme();
-            updateSettingsUI();
-            saveSettings();
-        };
-
-        // Unit Selection
-        els.unitBtns.forEach(btn => {
-            btn.onclick = () => {
-                const newUnit = btn.dataset.unit;
-                if (newUnit !== appState.unit) {
-                    appState.unit = newUnit;
-                    appState.platesOnOneSide = []; // Reset plates on unit switch
-                    renderControls(); // Re-render buttons
-                    updateSettingsUI();
-                    saveSettings();
-                    updateUI();
-                }
-            };
-        });
-
-        // Bar Type Selection
-        els.barBtns.forEach(btn => {
-            btn.onclick = () => {
-                appState.barType = btn.dataset.bar;
-                updateSettingsUI();
-                saveSettings();
-                updateUI();
-            };
-        });
-    }
-});
-
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
-}
+
+    document.querySelectorAll('.bar-select').forEach(btn => {
+        btn.onclick = (e) => {
+            state.bar = e.target.dataset.bar;
+            refreshSettingsUI();
+            updateUI();
+        };
+    });
+
+    load();
+    buildControls();
+    updateUI();
+});
