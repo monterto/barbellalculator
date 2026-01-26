@@ -1,30 +1,43 @@
-const cacheName = 'barbell-viz-v2'; // Change version number to force update
+const cacheName = 'barload-pro-v3'; // Incremented version
 const staticAssets = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json'
-  // Add './icon-192.png' here once you create it
 ];
 
-self.addEventListener('install', async e => {
-  const cache = await caches.open(cacheName);
-  await cache.addAll(staticAssets);
-  return self.skipWaiting();
+// 1. Install - Pre-cache all vital assets
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(cacheName).then(cache => {
+      return cache.addAll(staticAssets);
+    }).then(() => self.skipWaiting())
+  );
 });
 
+// 2. Activate - CLEAN UP OLD CACHES (Critical for offline stability)
 self.addEventListener('activate', e => {
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== cacheName)
+            .map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-self.addEventListener('fetch', async e => {
+// 3. Fetch - Offline-first strategy
+self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
 
+  // For same-origin assets, go Cache-First
   if (url.origin === location.origin) {
     e.respondWith(cacheFirst(req));
   } else {
+    // For external assets (like fonts), go Network-First
     e.respondWith(networkAndCache(req));
   }
 });
@@ -32,6 +45,7 @@ self.addEventListener('fetch', async e => {
 async function cacheFirst(req) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
+  // Return cached file, or try to fetch it if missing
   return cached || fetch(req);
 }
 
@@ -41,8 +55,8 @@ async function networkAndCache(req) {
     const fresh = await fetch(req);
     await cache.put(req, fresh.clone());
     return fresh;
-  } catch (e) {
-    const cached = await cache.match(req);
-    return cached;
+  } catch (err) {
+    const fallback = await cache.match(req);
+    return fallback;
   }
 }
