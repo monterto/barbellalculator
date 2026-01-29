@@ -82,63 +82,51 @@ body {
 }
 
 /* ============================================
-   HEADER - Compact app bar
+   FLOATING SETTINGS BUTTON - Top right corner
    ============================================ */
-header {
-    padding: 10px 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 8px var(--shadow);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.logo {
-    font-weight: 900;
-    font-size: 1.05rem;
-    letter-spacing: -0.5px;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.logo span {
-    font-weight: 700;
-}
-
-.icon-btn {
-    width: 36px;
-    height: 36px;
+.floating-settings-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
     border: none;
-    border-radius: 10px;
-    background: var(--bg);
+    border-radius: 50%;
+    background: var(--card);
     color: var(--text);
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 4px var(--shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px var(--shadow),
+                0 2px 4px var(--shadow);
+    z-index: 100;
+    border: 1px solid var(--border);
 }
 
-.icon-btn:active {
+.floating-settings-btn:hover {
+    transform: scale(1.05);
+}
+
+.floating-settings-btn:active {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px var(--shadow);
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+/* Add subtle rotation animation on hover for fun */
+@media (hover: hover) {
+    .floating-settings-btn:hover {
+        transform: scale(1.05) rotate(45deg);
+    }
 }
 
 /* ============================================
-   MAIN CONTENT - Ultra-compact spacing
+   MAIN CONTENT - Full height utilization
    ============================================ */
 main {
-    padding: 0 0 12px 0;
+    padding: 12px 0 12px 0;
     max-width: 500px;
     margin: 0 auto;
 }
@@ -148,10 +136,10 @@ main {
    ============================================ */
 .viz-card {
     background: var(--card-elevated);
-    margin: 10px 10px 10px;
+    margin: 0 10px 10px;
     border-radius: 18px;
     padding: 12px 10px;
-    height: 340px;
+    height: 360px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -708,6 +696,14 @@ main {
    RESPONSIVE - Small screens optimization
    ============================================ */
 @media (max-width: 360px) {
+    .floating-settings-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+        top: 10px;
+        right: 10px;
+    }
+    
     .main-stat {
         font-size: 2rem;
     }
@@ -730,7 +726,7 @@ main {
     }
     
     .viz-card {
-        height: 300px;
+        height: 320px;
     }
 }
 
@@ -738,8 +734,16 @@ main {
    LANDSCAPE MODE - Adjusted layout
    ============================================ */
 @media (orientation: landscape) and (max-height: 500px) {
+    .floating-settings-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        top: 8px;
+        right: 8px;
+    }
+    
     .viz-card {
-        height: 180px;
+        height: 200px;
         margin: 8px 10px 8px;
     }
     
