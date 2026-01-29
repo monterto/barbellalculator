@@ -6,10 +6,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./service-worker.js', { scope: './' })
       .then(function(registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
+        console.log('Service Worker registered');
       })
       .catch(function(err) {
-        console.error('Service Worker registration failed:', err);
+        console.error('Service Worker failed:', err);
       });
   });
 }
@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let state = {
-        unit: 'lbs', bar: 'men', theme: 'light', plates: [],
+        unit: 'lbs', 
+        bar: 'men', 
+        theme: 'light', 
+        plates: [],
+        addedWeightMode: 'per-side', // Mode toggle state
         inventory: {
             lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
             kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
@@ -80,15 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxWeight = Math.max(...weightList);
         
         let xOffset = 135; 
-        const centerY = 110; 
+        const centerY = 125; // Adjusted for larger viewBox
 
         state.plates.forEach(w => {
             const p = config[w];
-            const thicknessBase = 35;
+            // INCREASED SCALE: Higher thickness and diameter multipliers
+            const thicknessBase = 42; 
             const svgW = (w / maxWeight) * thicknessBase;
-            const maxDia = 17.7 * 10; 
+            const maxDia = 210; // ~20% increase from 177
+            
             const isHeavy = w >= 10;
-            const svgH = isHeavy ? maxDia : (p.dia * 10);
+            const svgH = isHeavy ? maxDia : (p.dia * 12);
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -101,9 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
             txt.setAttribute("x", xOffset + (svgW / 2)); 
-            txt.setAttribute("y", centerY + 5);
+            txt.setAttribute("y", centerY + 6);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
-            txt.style.fontSize = svgW < 18 ? '9px' : '13px'; 
+            
+            // READABILITY: Ensure font remains legible even on smallest plates
+            const fontSize = svgW < 14 ? 10 : 15;
+            txt.style.fontSize = `${fontSize}px`;
+            txt.style.fontWeight = "bold";
             txt.textContent = w;
             g.appendChild(txt);
 
@@ -115,17 +125,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = DATA[state.unit];
         const barWeight = config.bar[state.bar];
         const sideWeight = state.plates.reduce((a, b) => a + b, 0);
-        const total = barWeight + (sideWeight * 2);
+        const totalAddedWeight = sideWeight * 2;
+        const total = barWeight + totalAddedWeight;
 
         document.getElementById('total-weight').textContent = total.toFixed(1);
-        document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
         document.getElementById('unit-label').textContent = state.unit;
         document.querySelectorAll('.unit-sm').forEach(el => el.textContent = state.unit);
+
+        // Update Toggleable Added Weight Field
+        const labelEl = document.getElementById('added-weight-label');
+        const weightEl = document.getElementById('side-weight');
+
+        if (state.addedWeightMode === 'total') {
+            labelEl.textContent = "Added Weight (Total)";
+            weightEl.textContent = totalAddedWeight.toFixed(1);
+        } else {
+            labelEl.textContent = "Added Weight (Per Side)";
+            weightEl.textContent = sideWeight.toFixed(1);
+        }
 
         updateSettingsHighlights();
         renderPlates();
         save();
     }
+
+    // Toggle Added Weight Mode
+    document.getElementById('added-weight-toggle').onclick = () => {
+        state.addedWeightMode = state.addedWeightMode === 'per-side' ? 'total' : 'per-side';
+        updateUI();
+    };
 
     function buildControls() {
         const grid = document.getElementById('controls-grid');
@@ -145,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rem.onclick = () => { const i = state.plates.indexOf(w); if(i>-1){state.plates.splice(i,1); updateUI();} };
             
             div.append(btn, rem);
-            grid.appendChild(grid.appendChild(div));
+            grid.appendChild(div);
         });
     }
 
