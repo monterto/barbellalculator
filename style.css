@@ -131,14 +131,14 @@ main {
 }
 
 /* ============================================
-   VISUALIZATION CARD - MAXIMIZED for readability
+   VISUALIZATION CARD - MAXIMIZED with overlay stats
    ============================================ */
 .viz-card {
     background: var(--card-elevated);
     margin: 0 10px 10px;
     border-radius: 18px;
     padding: 12px 10px;
-    height: 360px;
+    height: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -167,6 +167,89 @@ main {
     width: 100%;
     height: 100%;
     filter: drop-shadow(0 2px 4px var(--shadow));
+}
+
+/* ============================================
+   STATS OVERLAY - Overlaid on visualization
+   ============================================ */
+.stats-overlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Added Weight Display - Left side, secondary */
+.added-weight-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: var(--card);
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.added-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.added-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Total Weight Display - Right side, primary */
+.total-weight-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background: var(--card);
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.total-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 2px;
+    letter-spacing: -1.5px;
+}
+
+.total-unit {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-bottom: 4px;
+}
+
+.total-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 /* ============================================
@@ -242,104 +325,18 @@ main {
 }
 
 /* ============================================
-   STATS CONTAINER - MINIMAL but clear
-   ============================================ */
-.stats-container {
-    text-align: center;
-    margin: 0 10px 8px;
-    padding: 10px 14px 12px;
-    background: var(--card-elevated);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 8px var(--shadow);
-}
-
-.main-stat {
-    font-size: 2.25rem;
-    font-weight: 900;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 5px;
-    line-height: 1;
-    margin-bottom: 3px;
-    letter-spacing: -1.5px;
-}
-
-.main-stat small {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    opacity: 0.7;
-    letter-spacing: 0;
-}
-
-.sub-stat-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-}
-
-/* ============================================
-   CLICKABLE STAT - Interactive weight display
-   ============================================ */
-.clickable-stat {
-    background: var(--bg);
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px solid var(--border);
-    margin-top: 8px;
-    margin-bottom: 10px;
-}
-
-.clickable-stat:active {
-    transform: scale(0.98);
-    background: var(--card);
-}
-
-#added-weight-label {
-    color: var(--text-secondary);
-    font-weight: 700;
-    font-size: 0.75rem;
-}
-
-#side-weight {
-    font-weight: 800;
-    color: var(--accent);
-    font-size: 0.95rem;
-}
-
-.unit-sm {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-/* ============================================
-   CLEAR BUTTON - Compact action
+   CLEAR BUTTON - Standalone compact action
    ============================================ */
 #clear-btn {
-    width: 100%;
-    padding: 10px;
+    width: calc(100% - 20px);
+    margin: 0 10px 10px;
+    padding: 12px;
     border: 2px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--bg);
     color: var(--text);
     font-weight: 800;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
@@ -703,8 +700,16 @@ main {
         right: 12px;
     }
     
-    .main-stat {
-        font-size: 2rem;
+    .viz-card {
+        height: 380px;
+    }
+    
+    .total-value {
+        font-size: 2.4rem;
+    }
+    
+    .added-value {
+        font-size: 1.3rem;
     }
     
     .controls-grid {
@@ -723,10 +728,6 @@ main {
         padding: 6px;
         min-height: 30px;
     }
-    
-    .viz-card {
-        height: 320px;
-    }
 }
 
 /* ============================================
@@ -742,17 +743,27 @@ main {
     }
     
     .viz-card {
-        height: 200px;
+        height: 240px;
         margin: 8px 10px 8px;
     }
     
-    .stats-container {
-        padding: 8px 12px 10px;
-        margin: 0 10px 6px;
+    .stats-overlay {
+        top: 10px;
+        left: 10px;
+        right: 10px;
     }
     
-    .main-stat {
-        font-size: 1.8rem;
+    .added-weight-display,
+    .total-weight-display {
+        padding: 6px 10px;
+    }
+    
+    .total-value {
+        font-size: 2rem;
+    }
+    
+    .added-value {
+        font-size: 1.2rem;
     }
     
     .controls-grid {
