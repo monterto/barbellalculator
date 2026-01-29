@@ -7,14 +7,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js', { scope: './' })
       .then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
-        registration.addEventListener('updatefound', function() {
-          const newWorker = registration.installing;
-          newWorker.addEventListener('statechange', function() {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('New version available! Refresh to update.');
-            }
-          });
-        });
       })
       .catch(function(err) {
         console.error('Service Worker registration failed:', err);
@@ -29,7 +21,6 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
     const DATA = {
         lbs: {
-            // Added zero option
             bar: { men: 45, women: 33, zero: 0 },
             plates: {
                 45: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
@@ -43,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
             list: [45, 35, 25, 15, 10, 5, 2.5]
         },
         kg: {
-            // Added zero option
             bar: { men: 20, women: 15, zero: 0 },
             plates: {
                 25: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
@@ -73,16 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.className = state.theme;
     }
 
-    // New Helper: Ensures settings visual state matches internal state
     function updateSettingsHighlights() {
         document.querySelectorAll('.unit-select').forEach(btn => {
-            if (btn.dataset.unit === state.unit) btn.classList.add('active');
-            else btn.classList.remove('active');
+            btn.classList.toggle('active', btn.dataset.unit === state.unit);
         });
-
         document.querySelectorAll('.bar-select').forEach(btn => {
-            if (btn.dataset.bar === state.bar) btn.classList.add('active');
-            else btn.classList.remove('active');
+            btn.classList.toggle('active', btn.dataset.bar === state.bar);
         });
     }
 
@@ -90,14 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const g = document.getElementById('plate-group');
         g.innerHTML = '';
         const config = DATA[state.unit].plates;
+        const weightList = DATA[state.unit].list;
+        const maxWeight = Math.max(...weightList);
         
         let xOffset = 135; 
         const centerY = 110; 
 
         state.plates.forEach(w => {
             const p = config[w];
-            const svgW = p.thick * 15; 
-            const svgH = p.dia * 8.5; 
+            const thicknessBase = 35;
+            const svgW = (w / maxWeight) * thicknessBase;
+            const maxDia = 17.7 * 10; 
+            const isHeavy = w >= 10;
+            const svgH = isHeavy ? maxDia : (p.dia * 10);
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -112,10 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
             txt.setAttribute("x", xOffset + (svgW / 2)); 
             txt.setAttribute("y", centerY + 5);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
-            txt.style.fontSize = svgW < 15 ? '10px' : '14px'; 
+            txt.style.fontSize = svgW < 18 ? '9px' : '13px'; 
             txt.textContent = w;
             g.appendChild(txt);
-            xOffset += svgW + 1;
+
+            xOffset += svgW + 2;
         });
     }
 
@@ -128,12 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
         document.getElementById('unit-label').textContent = state.unit;
-        
-        document.querySelectorAll('.unit-sm').forEach(el => {
-            el.textContent = state.unit;
-        });
+        document.querySelectorAll('.unit-sm').forEach(el => el.textContent = state.unit);
 
-        updateSettingsHighlights(); // Ensure highlights are correct on every update
+        updateSettingsHighlights();
         renderPlates();
         save();
     }
@@ -156,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rem.onclick = () => { const i = state.plates.indexOf(w); if(i>-1){state.plates.splice(i,1); updateUI();} };
             
             div.append(btn, rem);
-            grid.appendChild(div);
+            grid.appendChild(grid.appendChild(div));
         });
     }
 
@@ -173,10 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Controls ---
     document.getElementById('settings-btn').onclick = () => {
         renderInventory();
-        updateSettingsHighlights(); // Force check when opening
+        updateSettingsHighlights();
         document.getElementById('settings-modal').classList.remove('hidden');
     };
     document.getElementById('close-modal').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
@@ -201,13 +189,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
         state.unit = e.target.dataset.unit; state.plates = [];
-        // Removed manual active toggle here, relying on updateUI calling updateSettingsHighlights
         buildControls(); renderInventory(); updateUI();
     });
 
     document.querySelectorAll('.bar-select').forEach(b => b.onclick = (e) => {
         state.bar = e.target.dataset.bar;
-        // Removed manual active toggle here, relying on updateUI calling updateSettingsHighlights
         updateUI();
     });
 
