@@ -29,7 +29,8 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
     const DATA = {
         lbs: {
-            bar: { men: 45, women: 33 },
+            // Added zero option
+            bar: { men: 45, women: 33, zero: 0 },
             plates: {
                 45: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
                 35: { dia: 14.1, thick: 2.0, color: 'var(--blue)', darkTxt: false },
@@ -42,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
             list: [45, 35, 25, 15, 10, 5, 2.5]
         },
         kg: {
-            bar: { men: 20, women: 15 },
+            // Added zero option
+            bar: { men: 20, women: 15, zero: 0 },
             plates: {
                 25: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
                 20: { dia: 17.7, thick: 2.0, color: 'var(--blue)', darkTxt: false },
@@ -71,12 +73,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.className = state.theme;
     }
 
+    // New Helper: Ensures settings visual state matches internal state
+    function updateSettingsHighlights() {
+        document.querySelectorAll('.unit-select').forEach(btn => {
+            if (btn.dataset.unit === state.unit) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        document.querySelectorAll('.bar-select').forEach(btn => {
+            if (btn.dataset.bar === state.bar) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+
     function renderPlates() {
         const g = document.getElementById('plate-group');
         g.innerHTML = '';
         const config = DATA[state.unit].plates;
         
-        // Locked Collar is at X=135
         let xOffset = 135; 
         const centerY = 110; 
 
@@ -111,18 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const sideWeight = state.plates.reduce((a, b) => a + b, 0);
         const total = barWeight + (sideWeight * 2);
 
-        // Update values
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
-        
-        // Update MAIN unit label
         document.getElementById('unit-label').textContent = state.unit;
         
-        // Update SIDE unit label (and any others)
         document.querySelectorAll('.unit-sm').forEach(el => {
             el.textContent = state.unit;
         });
 
+        updateSettingsHighlights(); // Ensure highlights are correct on every update
         renderPlates();
         save();
     }
@@ -165,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Controls ---
     document.getElementById('settings-btn').onclick = () => {
         renderInventory();
+        updateSettingsHighlights(); // Force check when opening
         document.getElementById('settings-modal').classList.remove('hidden');
     };
     document.getElementById('close-modal').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
@@ -189,14 +201,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
         state.unit = e.target.dataset.unit; state.plates = [];
-        document.querySelectorAll('.unit-select').forEach(x => x.classList.remove('active'));
-        e.target.classList.add('active'); buildControls(); renderInventory(); updateUI();
+        // Removed manual active toggle here, relying on updateUI calling updateSettingsHighlights
+        buildControls(); renderInventory(); updateUI();
     });
 
     document.querySelectorAll('.bar-select').forEach(b => b.onclick = (e) => {
         state.bar = e.target.dataset.bar;
-        document.querySelectorAll('.bar-select').forEach(x => x.classList.remove('active'));
-        e.target.classList.add('active'); updateUI();
+        // Removed manual active toggle here, relying on updateUI calling updateSettingsHighlights
+        updateUI();
     });
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
