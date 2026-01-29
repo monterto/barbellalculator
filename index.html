@@ -8,18 +8,17 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
 </head>
-<body>
-    <header>
+<body class="dark"> <header>
         <div class="logo">Barbell<span>Calculator</span></div>
         <button id="settings-btn" class="icon-btn">⚙️</button>
     </header>
 
     <main>
         <div class="viz-card">
-            <svg id="barbell-viz" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+            <svg id="barbell-viz" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
                 <g id="bar-static-parts">
-                    <rect x="40" y="115" width="340" height="20" rx="2" fill="#888" />
-                    <rect id="collar-left" x="120" y="90" width="15" height="70" rx="2" fill="#666" />
+                    <rect x="20" y="130" width="380" height="20" rx="2" fill="#888" />
+                    <rect id="collar-left" x="120" y="95" width="15" height="90" rx="2" fill="#666" />
                 </g>
                 <g id="plate-group"></g>
             </svg>
@@ -76,7 +75,7 @@
                 <label>Inventory (Per Side)</label>
                 <div id="inventory-list" class="inventory-grid"></div>
             </div>
-            <button id="theme-toggle" class="full-btn">Toggle Dark Mode</button>
+            <button id="theme-toggle" class="full-btn">Toggle Theme</button>
         </div>
     </div>
     <script src="app.js"></script>
