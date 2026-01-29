@@ -436,7 +436,7 @@ main {
 }
 
 /* ============================================
-   MODAL - Modern settings overlay
+   MODAL - Compact settings overlay
    ============================================ */
 .modal {
     position: fixed;
@@ -468,10 +468,10 @@ main {
 .modal-content {
     background: var(--card);
     width: 100%;
-    max-width: 450px;
-    max-height: 85vh;
-    padding: 24px;
-    border-radius: 28px;
+    max-width: 420px;
+    max-height: 90vh;
+    padding: 20px;
+    border-radius: 24px;
     overflow-y: auto;
     color: var(--text);
     box-shadow: 0 20px 60px var(--shadow-lg);
@@ -494,14 +494,14 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 2px solid var(--border);
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 900;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -510,13 +510,13 @@ main {
 }
 
 #close-modal {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: none;
     background: var(--bg);
     color: var(--text);
-    font-size: 1.5rem;
-    border-radius: 10px;
+    font-size: 1.4rem;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -531,20 +531,78 @@ main {
 }
 
 /* ============================================
-   SETTINGS - Modern controls
+   SETTINGS - Compact controls
    ============================================ */
 .setting-item {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .setting-item label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Info button styling */
+.info-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: Georgia, serif;
+    font-style: italic;
+}
+
+.info-btn:active {
+    transform: scale(0.95);
+}
+
+/* Info message styling */
+.info-message {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text);
+    display: none;
+}
+
+.info-message.show {
+    display: block;
+    animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-message strong {
+    color: var(--accent);
 }
 
 /* ============================================
@@ -554,7 +612,7 @@ main {
     display: flex;
     background: var(--bg);
     padding: 4px;
-    border-radius: 14px;
+    border-radius: 12px;
     gap: 4px;
     border: 1px solid var(--border);
 }
@@ -562,12 +620,12 @@ main {
 .segmented-control button {
     flex: 1;
     border: none;
-    padding: 12px;
+    padding: 10px;
     background: transparent;
     color: var(--text-secondary);
     font-weight: 800;
-    font-size: 0.9rem;
-    border-radius: 10px;
+    font-size: 0.85rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
@@ -585,19 +643,19 @@ main {
 }
 
 /* ============================================
-   INVENTORY - Plate count manager
+   INVENTORY - Compact plate count manager
    ============================================ */
 .inventory-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .inv-item {
     background: var(--bg);
-    padding: 14px;
-    border-radius: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -606,17 +664,17 @@ main {
 
 .inv-item span {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .inv-item input {
-    width: 55px;
-    padding: 8px;
-    border-radius: 8px;
+    width: 50px;
+    padding: 6px;
+    border-radius: 6px;
     border: 2px solid var(--border);
     text-align: center;
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.95rem;
     background: var(--card);
     color: var(--text);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -626,30 +684,6 @@ main {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* ============================================
-   FULL WIDTH BUTTON - Theme toggle
-   ============================================ */
-.full-btn {
-    width: 100%;
-    padding: 16px;
-    margin-top: 20px;
-    border-radius: 14px;
-    border: 2px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-weight: 800;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.full-btn:active {
-    transform: scale(0.98);
-    background: var(--card);
 }
 
 /* ============================================
