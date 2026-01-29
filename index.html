@@ -57,10 +57,18 @@
                 <button id="close-modal">&times;</button>
             </div>
             <div class="setting-item">
-                <label>Unit System</label>
+                <label>
+                    Unit System
+                    <button class="info-btn" id="unit-info-btn">i</button>
+                </label>
                 <div class="segmented-control">
                     <button class="unit-select" data-unit="lbs">LBS</button>
                     <button class="unit-select" data-unit="kg">KG</button>
+                </div>
+                <div class="info-message" id="unit-info-message">
+                    <strong>KG</strong> follows Olympic weightlifting standards with plates sized for competition use.
+                    <br><br>
+                    <strong>LBS</strong> follows commercial gym standards commonly found in fitness centers.
                 </div>
             </div>
             <div class="setting-item">
@@ -72,10 +80,16 @@
                 </div>
             </div>
             <div class="setting-item">
+                <label>Theme</label>
+                <div class="segmented-control">
+                    <button class="theme-select" data-theme="light">Light</button>
+                    <button class="theme-select" data-theme="dark">Dark</button>
+                </div>
+            </div>
+            <div class="setting-item">
                 <label>Inventory (Per Side)</label>
                 <div id="inventory-list" class="inventory-grid"></div>
             </div>
-            <button id="theme-toggle" class="full-btn">Toggle Theme</button>
         </div>
     </div>
     <script src="app.js"></script>
