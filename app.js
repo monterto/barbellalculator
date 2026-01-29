@@ -1,5 +1,5 @@
 // ============================================
-// SERVICE WORKER & PWA (Updated for Offline Reliability)
+// SERVICE WORKER & PWA
 // ============================================
 
 if ('serviceWorker' in navigator) {
@@ -76,13 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
         g.innerHTML = '';
         const config = DATA[state.unit].plates;
         
-        // Locked Collar is now at X=120 + 15 width = 135
+        // Locked Collar is at X=135
         let xOffset = 135; 
-        const centerY = 110; // Center in new viewbox (220/2)
+        const centerY = 110; 
 
         state.plates.forEach(w => {
             const p = config[w];
-            // INCREASED SCALING: 15x thickness, 8.5x diameter
             const svgW = p.thick * 15; 
             const svgH = p.dia * 8.5; 
             const y = centerY - (svgH / 2);
@@ -96,11 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
             g.appendChild(rect);
 
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            // Adjusted text position to center in new larger plates
             txt.setAttribute("x", xOffset + (svgW / 2)); 
             txt.setAttribute("y", centerY + 5);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
-            // Dynamically scale font slightly based on width
             txt.style.fontSize = svgW < 15 ? '10px' : '14px'; 
             txt.textContent = w;
             g.appendChild(txt);
@@ -114,9 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const sideWeight = state.plates.reduce((a, b) => a + b, 0);
         const total = barWeight + (sideWeight * 2);
 
+        // Update values
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
+        
+        // Update MAIN unit label
         document.getElementById('unit-label').textContent = state.unit;
+        
+        // Update SIDE unit label (and any others)
+        document.querySelectorAll('.unit-sm').forEach(el => {
+            el.textContent = state.unit;
+        });
+
         renderPlates();
         save();
     }
