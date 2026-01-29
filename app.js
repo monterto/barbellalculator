@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         bar: 'men', 
         theme: 'dark', // Defaulting state to dark
         plates: [],
-        addedWeightMode: 'per-side',
         inventory: {
             lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
             kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
@@ -125,28 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('unit-label').textContent = state.unit;
-        document.querySelectorAll('.unit-sm').forEach(el => el.textContent = state.unit);
-
-        const labelEl = document.getElementById('added-weight-label');
-        const weightEl = document.getElementById('side-weight');
-
-        if (state.addedWeightMode === 'total') {
-            labelEl.textContent = "Added Weight (Total)";
-            weightEl.textContent = totalAddedWeight.toFixed(1);
-        } else {
-            labelEl.textContent = "Added Weight (Per Side)";
-            weightEl.textContent = sideWeight.toFixed(1);
-        }
+        document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
+        
+        // Update added weight label
+        const addedLabel = document.querySelector('.added-label');
+        addedLabel.textContent = `${state.unit} per side`;
 
         updateSettingsHighlights();
         renderPlates();
         save();
     }
-
-    document.getElementById('added-weight-toggle').onclick = () => {
-        state.addedWeightMode = state.addedWeightMode === 'per-side' ? 'total' : 'per-side';
-        updateUI();
-    };
 
     function buildControls() {
         const grid = document.getElementById('controls-grid');
