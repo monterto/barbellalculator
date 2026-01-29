@@ -16,10 +16,10 @@
 
     <main>
         <div class="viz-card">
-            <svg id="barbell-viz" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+            <svg id="barbell-viz" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
                 <g id="bar-static-parts">
-                    <rect x="40" y="100" width="340" height="20" rx="2" fill="#888" />
-                    <rect id="collar-left" x="120" y="85" width="15" height="50" rx="2" fill="#666" />
+                    <rect x="40" y="115" width="340" height="20" rx="2" fill="#888" />
+                    <rect id="collar-left" x="120" y="90" width="15" height="70" rx="2" fill="#666" />
                 </g>
                 <g id="plate-group"></g>
             </svg>
@@ -38,10 +38,11 @@
                 <span id="total-weight">45.0</span>
                 <small id="unit-label">lbs</small>
             </div>
-            <div class="sub-stat">Total Weight</div>
+            <div class="sub-stat-label">Total Weight</div>
             
-            <div class="sub-stat" style="margin-top: 10px;">
-                Added Weight: <span id="side-weight">0.0</span> <span class="unit-sm">lbs</span>
+            <div id="added-weight-toggle" class="sub-stat clickable-stat" style="margin-top: 15px; cursor: pointer; user-select: none;">
+                <span id="added-weight-label">Added Weight (Per Side)</span>: 
+                <span id="side-weight">0.0</span> <span class="unit-sm">lbs</span>
             </div>
             
             <button id="clear-btn">Clear Bar</button>
