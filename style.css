@@ -82,10 +82,10 @@ body {
 }
 
 /* ============================================
-   HEADER - Modern app bar with elevation
+   HEADER - Compact app bar
    ============================================ */
 header {
-    padding: 12px 16px;
+    padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -101,7 +101,7 @@ header {
 
 .logo {
     font-weight: 900;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     letter-spacing: -0.5px;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -114,13 +114,13 @@ header {
 }
 
 .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--bg);
     color: var(--text);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -135,23 +135,23 @@ header {
 }
 
 /* ============================================
-   MAIN CONTENT - Optimized spacing for no-scroll
+   MAIN CONTENT - Ultra-compact spacing
    ============================================ */
 main {
-    padding: 0 0 16px 0;
+    padding: 0 0 12px 0;
     max-width: 500px;
     margin: 0 auto;
 }
 
 /* ============================================
-   VISUALIZATION CARD - ENLARGED for readability
+   VISUALIZATION CARD - MAXIMIZED for readability
    ============================================ */
 .viz-card {
     background: var(--card-elevated);
-    margin: 12px 12px 12px;
-    border-radius: 20px;
-    padding: 16px 12px;
-    height: 280px;
+    margin: 10px 10px 10px;
+    border-radius: 18px;
+    padding: 12px 10px;
+    height: 340px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -183,22 +183,22 @@ main {
 }
 
 /* ============================================
-   TARGET INPUT CARD - COMPACT design
+   TARGET INPUT CARD - ULTRA COMPACT
    ============================================ */
 .target-input-card {
     background: var(--card-elevated);
-    margin: 0 12px 10px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    margin: 0 10px 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 2px 8px var(--shadow);
 }
 
 .target-input-card label {
     display: block;
     font-weight: 700;
-    font-size: 0.75rem;
-    margin-bottom: 8px;
+    font-size: 0.7rem;
+    margin-bottom: 6px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -206,46 +206,47 @@ main {
 
 .input-group {
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .input-group input {
     flex: 1;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border: 2px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--bg);
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     outline: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .input-group input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1),
-                inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1),
+                inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .input-group input::placeholder {
     color: var(--text-secondary);
     opacity: 0.6;
+    font-size: 0.9rem;
 }
 
 #calc-btn {
     background: var(--accent-gradient);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 0 24px;
+    border-radius: 10px;
+    padding: 0 20px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    min-width: 80px;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+    min-width: 70px;
 }
 
 #calc-btn:active {
@@ -254,20 +255,20 @@ main {
 }
 
 /* ============================================
-   STATS CONTAINER - COMPACT but clear
+   STATS CONTAINER - MINIMAL but clear
    ============================================ */
 .stats-container {
     text-align: center;
-    margin: 0 12px 10px;
-    padding: 14px 16px 16px;
+    margin: 0 10px 8px;
+    padding: 10px 14px 12px;
     background: var(--card-elevated);
-    border-radius: 16px;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 2px 8px var(--shadow);
 }
 
 .main-stat {
-    font-size: 2.75rem;
+    font-size: 2.25rem;
     font-weight: 900;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -276,14 +277,14 @@ main {
     display: flex;
     align-items: baseline;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     line-height: 1;
-    margin-bottom: 4px;
-    letter-spacing: -2px;
+    margin-bottom: 3px;
+    letter-spacing: -1.5px;
 }
 
 .main-stat small {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--text-secondary);
     opacity: 0.7;
@@ -291,12 +292,12 @@ main {
 }
 
 .sub-stat-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 /* ============================================
@@ -304,17 +305,17 @@ main {
    ============================================ */
 .clickable-stat {
     background: var(--bg);
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text);
     cursor: pointer;
     user-select: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid var(--border);
-    margin-top: 10px;
-    margin-bottom: 12px;
+    margin-top: 8px;
+    margin-bottom: 10px;
 }
 
 .clickable-stat:active {
@@ -325,32 +326,33 @@ main {
 #added-weight-label {
     color: var(--text-secondary);
     font-weight: 700;
+    font-size: 0.75rem;
 }
 
 #side-weight {
     font-weight: 800;
     color: var(--accent);
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .unit-sm {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
 }
 
 /* ============================================
-   CLEAR BUTTON - Prominent action
+   CLEAR BUTTON - Compact action
    ============================================ */
 #clear-btn {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     border: 2px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--bg);
     color: var(--text);
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
@@ -363,41 +365,41 @@ main {
 }
 
 /* ============================================
-   CONTROLS GRID - Plate selection buttons
+   CONTROLS GRID - Compact plate selection
    ============================================ */
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    padding: 0 12px 16px;
+    gap: 7px;
+    padding: 0 10px 12px;
 }
 
 .plate-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 }
 
 /* Enhanced plate buttons with better depth */
 .plate-btn {
-    padding: 16px 0;
+    padding: 14px 0;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     font-weight: 900;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2),
-                0 6px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2),
+                0 5px 10px rgba(0, 0, 0, 0.15);
     position: relative;
     color: white;
-    min-height: 56px;
+    min-height: 52px;
 }
 
 .plate-btn:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2),
-                0 3px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2),
+                0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 /* Subtle gradient overlay on plate buttons */
@@ -405,7 +407,7 @@ main {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 14px;
+    border-radius: 12px;
     background: linear-gradient(180deg, 
                 rgba(255, 255, 255, 0.2) 0%, 
                 transparent 50%,
@@ -416,16 +418,16 @@ main {
 .remove-btn {
     background: var(--card);
     border: 2px solid var(--border);
-    padding: 8px;
-    border-radius: 10px;
+    padding: 7px;
+    border-radius: 8px;
     color: var(--text);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 800;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    min-height: 36px;
+    min-height: 32px;
 }
 
 .remove-btn:active {
@@ -651,10 +653,10 @@ main {
 }
 
 /* ============================================
-   SVG PLATE LABELS - Enhanced readability
+   SVG PLATE LABELS - ENHANCED readability
    ============================================ */
 .plate-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 900;
     fill: white;
     text-anchor: middle;
@@ -673,28 +675,28 @@ main {
    ============================================ */
 @media (max-width: 360px) {
     .main-stat {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
     
     .controls-grid {
         gap: 6px;
-        padding: 0 10px 12px;
+        padding: 0 10px 10px;
     }
     
     .plate-btn {
-        font-size: 1.1rem;
-        padding: 14px 0;
-        min-height: 52px;
+        font-size: 1.05rem;
+        padding: 12px 0;
+        min-height: 48px;
     }
     
     .remove-btn {
-        font-size: 0.65rem;
-        padding: 7px;
-        min-height: 34px;
+        font-size: 0.6rem;
+        padding: 6px;
+        min-height: 30px;
     }
     
     .viz-card {
-        height: 240px;
+        height: 300px;
     }
 }
 
@@ -703,25 +705,32 @@ main {
    ============================================ */
 @media (orientation: landscape) and (max-height: 500px) {
     .viz-card {
-        height: 160px;
-        margin: 10px 12px 10px;
+        height: 180px;
+        margin: 8px 10px 8px;
     }
     
     .stats-container {
-        padding: 10px 14px 12px;
-        margin: 0 12px 8px;
+        padding: 8px 12px 10px;
+        margin: 0 10px 6px;
     }
     
     .main-stat {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
     }
     
     .controls-grid {
-        padding: 0 12px 12px;
+        padding: 0 10px 10px;
+        gap: 6px;
     }
     
     .target-input-card {
-        padding: 10px 12px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+    }
+    
+    .plate-btn {
+        min-height: 44px;
+        padding: 10px 0;
     }
 }
 
