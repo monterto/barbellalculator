@@ -82,43 +82,42 @@ body {
 }
 
 /* ============================================
-   FLOATING SETTINGS BUTTON - Top right corner
+   FLOATING SETTINGS BUTTON - Overlaid top right
    ============================================ */
 .floating-settings-btn {
     position: fixed;
-    top: 12px;
-    right: 12px;
-    width: 48px;
-    height: 48px;
+    top: 14px;
+    right: 14px;
+    width: 52px;
+    height: 52px;
     border: none;
     border-radius: 50%;
-    background: var(--card);
-    color: var(--text);
-    font-size: 1.4rem;
+    background: var(--accent-gradient);
+    color: white;
+    font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px var(--shadow),
-                0 2px 4px var(--shadow);
-    z-index: 100;
-    border: 1px solid var(--border);
-}
-
-.floating-settings-btn:hover {
-    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4),
+                0 3px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .floating-settings-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 2px 6px var(--shadow);
+    transform: scale(0.92);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4),
+                0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Add subtle rotation animation on hover for fun */
+/* Rotate animation on hover for desktop */
 @media (hover: hover) {
     .floating-settings-btn:hover {
-        transform: scale(1.05) rotate(45deg);
+        transform: scale(1.08) rotate(90deg);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5),
+                    0 4px 8px rgba(0, 0, 0, 0.2);
     }
 }
 
@@ -697,11 +696,11 @@ main {
    ============================================ */
 @media (max-width: 360px) {
     .floating-settings-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 1.3rem;
-        top: 10px;
-        right: 10px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+        top: 12px;
+        right: 12px;
     }
     
     .main-stat {
@@ -735,11 +734,11 @@ main {
    ============================================ */
 @media (orientation: landscape) and (max-height: 500px) {
     .floating-settings-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-        top: 8px;
-        right: 8px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+        top: 10px;
+        right: 10px;
     }
     
     .viz-card {
