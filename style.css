@@ -8,6 +8,7 @@
    - Improved touch targets (48px+)
    - Vibrant gradient accents
    - Better visual hierarchy
+   - OPTIMIZED: Larger viz, smaller input/stats, no scroll
    ============================================ */
 
 /* ============================================
@@ -84,7 +85,7 @@ body {
    HEADER - Modern app bar with elevation
    ============================================ */
 header {
-    padding: 16px 20px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -100,7 +101,7 @@ header {
 
 .logo {
     font-weight: 900;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     letter-spacing: -0.5px;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -113,13 +114,13 @@ header {
 }
 
 .icon-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border: none;
     border-radius: 12px;
     background: var(--bg);
     color: var(--text);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -134,23 +135,23 @@ header {
 }
 
 /* ============================================
-   MAIN CONTENT - Optimized spacing
+   MAIN CONTENT - Optimized spacing for no-scroll
    ============================================ */
 main {
-    padding: 0 0 24px 0;
+    padding: 0 0 16px 0;
     max-width: 500px;
     margin: 0 auto;
 }
 
 /* ============================================
-   VISUALIZATION CARD - Enhanced barbell view
+   VISUALIZATION CARD - ENLARGED for readability
    ============================================ */
 .viz-card {
     background: var(--card-elevated);
-    margin: 16px 16px 20px;
-    border-radius: 24px;
-    padding: 20px 16px;
-    height: 200px;
+    margin: 12px 12px 12px;
+    border-radius: 20px;
+    padding: 16px 12px;
+    height: 280px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,13 +183,13 @@ main {
 }
 
 /* ============================================
-   TARGET INPUT CARD - Modern input design
+   TARGET INPUT CARD - COMPACT design
    ============================================ */
 .target-input-card {
     background: var(--card-elevated);
-    margin: 0 16px 20px;
-    padding: 20px;
-    border-radius: 20px;
+    margin: 0 12px 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 12px var(--shadow);
 }
@@ -196,8 +197,8 @@ main {
 .target-input-card label {
     display: block;
     font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 12px;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -205,17 +206,17 @@ main {
 
 .input-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .input-group input {
     flex: 1;
-    padding: 16px 18px;
+    padding: 12px 14px;
     border: 2px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--bg);
     color: var(--text);
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 700;
     outline: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -237,14 +238,14 @@ main {
     background: var(--accent-gradient);
     color: white;
     border: none;
-    border-radius: 14px;
-    padding: 0 28px;
+    border-radius: 12px;
+    padding: 0 24px;
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    min-width: 90px;
+    min-width: 80px;
 }
 
 #calc-btn:active {
@@ -253,20 +254,20 @@ main {
 }
 
 /* ============================================
-   STATS CONTAINER - Enhanced display
+   STATS CONTAINER - COMPACT but clear
    ============================================ */
 .stats-container {
     text-align: center;
-    margin: 0 16px 24px;
-    padding: 24px 20px;
+    margin: 0 12px 10px;
+    padding: 14px 16px 16px;
     background: var(--card-elevated);
-    border-radius: 20px;
+    border-radius: 16px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 12px var(--shadow);
 }
 
 .main-stat {
-    font-size: 4rem;
+    font-size: 2.75rem;
     font-weight: 900;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -275,14 +276,14 @@ main {
     display: flex;
     align-items: baseline;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     letter-spacing: -2px;
 }
 
 .main-stat small {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-secondary);
     opacity: 0.7;
@@ -290,12 +291,12 @@ main {
 }
 
 .sub-stat-label {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
 }
 
 /* ============================================
@@ -303,17 +304,17 @@ main {
    ============================================ */
 .clickable-stat {
     background: var(--bg);
-    padding: 14px 20px;
-    border-radius: 14px;
-    font-size: 0.95rem;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text);
     cursor: pointer;
     user-select: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid var(--border);
-    margin-top: 16px;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 12px;
 }
 
 .clickable-stat:active {
@@ -329,12 +330,12 @@ main {
 #side-weight {
     font-weight: 800;
     color: var(--accent);
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .unit-sm {
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
@@ -343,13 +344,13 @@ main {
    ============================================ */
 #clear-btn {
     width: 100%;
-    padding: 16px;
+    padding: 12px;
     border: 2px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--bg);
     color: var(--text);
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
@@ -367,30 +368,30 @@ main {
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    padding: 0 16px 24px;
+    gap: 8px;
+    padding: 0 12px 16px;
 }
 
 .plate-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
 }
 
 /* Enhanced plate buttons with better depth */
 .plate-btn {
-    padding: 20px 0;
+    padding: 16px 0;
     border: none;
-    border-radius: 16px;
+    border-radius: 14px;
     font-weight: 900;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2),
                 0 6px 12px rgba(0, 0, 0, 0.15);
     position: relative;
     color: white;
-    min-height: 64px;
+    min-height: 56px;
 }
 
 .plate-btn:active {
@@ -404,7 +405,7 @@ main {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 16px;
+    border-radius: 14px;
     background: linear-gradient(180deg, 
                 rgba(255, 255, 255, 0.2) 0%, 
                 transparent 50%,
@@ -415,16 +416,16 @@ main {
 .remove-btn {
     background: var(--card);
     border: 2px solid var(--border);
-    padding: 10px;
+    padding: 8px;
     border-radius: 10px;
     color: var(--text);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    min-height: 40px;
+    min-height: 36px;
 }
 
 .remove-btn:active {
@@ -653,7 +654,7 @@ main {
    SVG PLATE LABELS - Enhanced readability
    ============================================ */
 .plate-label {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 900;
     fill: white;
     text-anchor: middle;
@@ -672,23 +673,28 @@ main {
    ============================================ */
 @media (max-width: 360px) {
     .main-stat {
-        font-size: 3.5rem;
+        font-size: 2.5rem;
     }
     
     .controls-grid {
-        gap: 8px;
+        gap: 6px;
+        padding: 0 10px 12px;
     }
     
     .plate-btn {
-        font-size: 1.15rem;
-        padding: 16px 0;
-        min-height: 56px;
+        font-size: 1.1rem;
+        padding: 14px 0;
+        min-height: 52px;
     }
     
     .remove-btn {
-        font-size: 0.7rem;
-        padding: 8px;
-        min-height: 36px;
+        font-size: 0.65rem;
+        padding: 7px;
+        min-height: 34px;
+    }
+    
+    .viz-card {
+        height: 240px;
     }
 }
 
@@ -697,21 +703,25 @@ main {
    ============================================ */
 @media (orientation: landscape) and (max-height: 500px) {
     .viz-card {
-        height: 140px;
-        margin: 12px 16px 16px;
+        height: 160px;
+        margin: 10px 12px 10px;
     }
     
     .stats-container {
-        padding: 16px;
-        margin: 0 16px 16px;
+        padding: 10px 14px 12px;
+        margin: 0 12px 8px;
     }
     
     .main-stat {
-        font-size: 3rem;
+        font-size: 2.2rem;
     }
     
     .controls-grid {
-        padding: 0 16px 16px;
+        padding: 0 12px 12px;
+    }
+    
+    .target-input-card {
+        padding: 10px 12px;
     }
 }
 
