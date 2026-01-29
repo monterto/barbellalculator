@@ -13,6 +13,17 @@
 
     <main>
         <div class="viz-card">
+            <div class="stats-overlay">
+                <div class="added-weight-display">
+                    <span class="added-value" id="side-weight">0.0</span>
+                    <span class="added-label">lbs per side</span>
+                </div>
+                <div class="total-weight-display">
+                    <span class="total-value" id="total-weight">45.0</span>
+                    <span class="total-unit" id="unit-label">lbs</span>
+                    <span class="total-label">Total Weight</span>
+                </div>
+            </div>
             <svg id="barbell-viz" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
                 <g id="bar-static-parts">
                     <rect x="20" y="130" width="380" height="20" rx="2" fill="#888" />
@@ -30,20 +41,7 @@
             </div>
         </div>
 
-        <div class="stats-container">
-            <div class="main-stat">
-                <span id="total-weight">45.0</span>
-                <small id="unit-label">lbs</small>
-            </div>
-            <div class="sub-stat-label">Total Weight</div>
-            
-            <div id="added-weight-toggle" class="sub-stat clickable-stat" style="margin-top: 15px; cursor: pointer; user-select: none;">
-                <span id="added-weight-label">Added Weight (Per Side)</span>: 
-                <span id="side-weight">0.0</span> <span class="unit-sm">lbs</span>
-            </div>
-            
-            <button id="clear-btn">Clear Bar</button>
-        </div>
+        <button id="clear-btn">Clear Bar</button>
 
         <div class="controls-grid" id="controls-grid"></div>
     </main>
