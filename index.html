@@ -86,15 +86,29 @@
                 </div>
             </div>
             <div class="setting-item">
+                <label>Custom Bar Presets</label>
+                <div class="custom-bar-input">
+                    <input type="text" id="custom-bar-name" placeholder="Preset name" maxlength="20">
+                    <input type="number" id="custom-bar-weight" placeholder="Weight" inputmode="decimal">
+                    <button id="save-custom-bar" class="add-preset-btn">Save</button>
+                </div>
+                <div id="custom-bar-list" class="custom-bar-presets"></div>
+            </div>
+            <div class="setting-item">
+                <button class="collapsible-header" id="inventory-toggle">
+                    <span>Plate Inventory (Per Side)</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div id="inventory-section" class="collapsible-content hidden">
+                    <div id="inventory-list" class="inventory-grid"></div>
+                </div>
+            </div>
+            <div class="setting-item">
                 <label>Theme</label>
                 <div class="segmented-control">
                     <button class="theme-select" data-theme="light">Light</button>
                     <button class="theme-select" data-theme="dark">Dark</button>
                 </div>
-            </div>
-            <div class="setting-item">
-                <label>Inventory (Per Side)</label>
-                <div id="inventory-list" class="inventory-grid"></div>
             </div>
         </div>
     </div>
