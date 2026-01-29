@@ -1,20 +1,4 @@
 // ============================================
-// SERVICE WORKER & PWA
-// ============================================
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-      .then(function(registration) {
-        console.log('Service Worker registered');
-      })
-      .catch(function(err) {
-        console.error('Service Worker failed:', err);
-      });
-  });
-}
-
-// ============================================
 // APP LOGIC
 // ============================================
 
@@ -51,9 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         unit: 'lbs', 
         bar: 'men', 
-        theme: 'light', 
+        theme: 'dark', // Defaulting state to dark
         plates: [],
-        addedWeightMode: 'per-side', // Mode toggle state
+        addedWeightMode: 'per-side',
         inventory: {
             lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
             kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
@@ -68,12 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSettingsHighlights() {
-        document.querySelectorAll('.unit-select').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.unit === state.unit);
-        });
-        document.querySelectorAll('.bar-select').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.bar === state.bar);
-        });
+        document.querySelectorAll('.unit-select').forEach(btn => btn.classList.toggle('active', btn.dataset.unit === state.unit));
+        document.querySelectorAll('.bar-select').forEach(btn => btn.classList.toggle('active', btn.dataset.bar === state.bar));
     }
 
     function renderPlates() {
@@ -84,17 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxWeight = Math.max(...weightList);
         
         let xOffset = 135; 
-        const centerY = 125; // Adjusted for larger viewBox
+        const centerY = 140; 
 
         state.plates.forEach(w => {
             const p = config[w];
-            // INCREASED SCALE: Higher thickness and diameter multipliers
-            const thicknessBase = 42; 
-            const svgW = (w / maxWeight) * thicknessBase;
-            const maxDia = 210; // ~20% increase from 177
             
+            // Scaled up thickness base for better visibility
+            const thicknessBase = 48; 
+            let svgW = (w / maxWeight) * thicknessBase;
+            
+            // Readability: Clamp minimum width for smaller plates
+            if (w <= 5) svgW = Math.max(svgW, 18);
+
+            const maxDia = 240; 
             const isHeavy = w >= 10;
-            const svgH = isHeavy ? maxDia : (p.dia * 12);
+            
+            // Readability: Clamp minimum height for smaller plates
+            let svgH = isHeavy ? maxDia : (p.dia * 14);
+            if (w <= 5) svgH = Math.max(svgH, 90);
+
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -107,17 +95,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
             txt.setAttribute("x", xOffset + (svgW / 2)); 
-            txt.setAttribute("y", centerY + 6);
+            txt.setAttribute("y", centerY + 7);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
             
-            // READABILITY: Ensure font remains legible even on smallest plates
-            const fontSize = svgW < 14 ? 10 : 15;
+            // Text scale logic
+            const fontSize = svgW < 20 ? 11 : 16;
             txt.style.fontSize = `${fontSize}px`;
             txt.style.fontWeight = "bold";
             txt.textContent = w;
             g.appendChild(txt);
 
-            xOffset += svgW + 2;
+            xOffset += svgW + 3;
         });
     }
 
@@ -132,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('unit-label').textContent = state.unit;
         document.querySelectorAll('.unit-sm').forEach(el => el.textContent = state.unit);
 
-        // Update Toggleable Added Weight Field
         const labelEl = document.getElementById('added-weight-label');
         const weightEl = document.getElementById('side-weight');
 
@@ -149,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         save();
     }
 
-    // Toggle Added Weight Mode
     document.getElementById('added-weight-toggle').onclick = () => {
         state.addedWeightMode = state.addedWeightMode === 'per-side' ? 'total' : 'per-side';
         updateUI();
