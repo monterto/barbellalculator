@@ -225,6 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
         infoMsg.classList.toggle('show');
     };
 
+    document.getElementById('barbell-info-btn').onclick = () => {
+        const infoMsg = document.getElementById('barbell-info-message');
+        infoMsg.classList.toggle('show');
+    };
+
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 
     load();
