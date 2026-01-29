@@ -1,3 +1,31 @@
+// ============================================
+// SERVICE WORKER & PWA (Updated for Offline Reliability)
+// ============================================
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+      .then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+        registration.addEventListener('updatefound', function() {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', function() {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('New version available! Refresh to update.');
+            }
+          });
+        });
+      })
+      .catch(function(err) {
+        console.error('Service Worker registration failed:', err);
+      });
+  });
+}
+
+// ============================================
+// APP LOGIC
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
     const DATA = {
         lbs: {
@@ -48,14 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
         g.innerHTML = '';
         const config = DATA[state.unit].plates;
         
-        // Locked Collar is at X=155 (140 + 15 width)
-        let xOffset = 155; 
-        const centerY = 100;
+        // Locked Collar is now at X=120 + 15 width = 135
+        let xOffset = 135; 
+        const centerY = 110; // Center in new viewbox (220/2)
 
         state.plates.forEach(w => {
             const p = config[w];
-            const svgW = p.thick * 12; // Thicker visual plates
-            const svgH = p.dia * 6.5; // Larger height scale
+            // INCREASED SCALING: 15x thickness, 8.5x diameter
+            const svgW = p.thick * 15; 
+            const svgH = p.dia * 8.5; 
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -67,8 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
             g.appendChild(rect);
 
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            txt.setAttribute("x", xOffset + (svgW / 2)); txt.setAttribute("y", centerY + 4);
+            // Adjusted text position to center in new larger plates
+            txt.setAttribute("x", xOffset + (svgW / 2)); 
+            txt.setAttribute("y", centerY + 5);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
+            // Dynamically scale font slightly based on width
+            txt.style.fontSize = svgW < 15 ? '10px' : '14px'; 
             txt.textContent = w;
             g.appendChild(txt);
             xOffset += svgW + 1;
