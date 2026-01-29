@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inventory: {
             lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
             kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
-        }
+        },
+        customBars: []
     };
 
     function save() { localStorage.setItem('barLoaderPro_v3', JSON.stringify(state)); }
@@ -117,7 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateUI() {
         const config = DATA[state.unit];
-        const barWeight = config.bar[state.bar];
+        let barWeight;
+        
+        // Check if custom bar is selected
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            barWeight = customBar ? customBar.weight : 0;
+        } else {
+            barWeight = config.bar[state.bar];
+        }
+        
         const sideWeight = state.plates.reduce((a, b) => a + b, 0);
         const totalAddedWeight = sideWeight * 2;
         const total = barWeight + totalAddedWeight;
@@ -129,6 +139,54 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSettingsHighlights();
         renderPlates();
         save();
+    }
+
+    function renderCustomBars() {
+        const list = document.getElementById('custom-bar-list');
+        list.innerHTML = '';
+        
+        state.customBars.forEach(preset => {
+            const div = document.createElement('div');
+            div.className = `custom-bar-preset ${state.bar === preset.id ? 'active' : ''}`;
+            
+            const info = document.createElement('div');
+            info.className = 'preset-info';
+            info.onclick = () => {
+                state.bar = preset.id;
+                state.plates = [];
+                updateUI();
+                renderCustomBars();
+            };
+            
+            const name = document.createElement('div');
+            name.className = 'preset-name';
+            name.textContent = preset.name;
+            
+            const weight = document.createElement('div');
+            weight.className = 'preset-weight';
+            weight.textContent = `${preset.weight} ${preset.unit}`;
+            
+            info.appendChild(name);
+            info.appendChild(weight);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-preset-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                state.customBars = state.customBars.filter(b => b.id !== preset.id);
+                if (state.bar === preset.id) {
+                    state.bar = 'men';
+                }
+                save();
+                renderCustomBars();
+                updateUI();
+            };
+            
+            div.appendChild(info);
+            div.appendChild(deleteBtn);
+            list.appendChild(div);
+        });
     }
 
     function buildControls() {
@@ -168,16 +226,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('settings-btn').onclick = () => {
         renderInventory();
+        renderCustomBars();
         updateSettingsHighlights();
         document.getElementById('settings-modal').classList.remove('hidden');
     };
     document.getElementById('close-modal').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
     
+    document.getElementById('inventory-toggle').onclick = function() {
+        const content = document.getElementById('inventory-section');
+        const isHidden = content.classList.contains('hidden');
+        
+        if (isHidden) {
+            content.classList.remove('hidden');
+            content.classList.add('show');
+            this.classList.add('active');
+        } else {
+            content.classList.remove('show');
+            content.classList.add('hidden');
+            this.classList.remove('active');
+        }
+    };
+    
+    document.getElementById('save-custom-bar').onclick = () => {
+        const name = document.getElementById('custom-bar-name').value.trim();
+        const weight = parseFloat(document.getElementById('custom-bar-weight').value);
+        
+        if (!name || isNaN(weight) || weight < 0) {
+            return;
+        }
+        
+        const preset = {
+            id: 'custom-' + Date.now(),
+            name: name,
+            weight: weight,
+            unit: state.unit
+        };
+        
+        state.customBars.push(preset);
+        save();
+        renderCustomBars();
+        
+        // Clear inputs
+        document.getElementById('custom-bar-name').value = '';
+        document.getElementById('custom-bar-weight').value = '';
+    };
+    
     document.getElementById('calc-btn').onclick = () => {
         const target = parseFloat(document.getElementById('target-weight-input').value);
-        const bar = DATA[state.unit].bar[state.bar];
-        if (isNaN(target) || target < bar) return;
-        let rem = (target - bar) / 2;
+        
+        let barWeight;
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            barWeight = customBar ? customBar.weight : 0;
+        } else {
+            barWeight = DATA[state.unit].bar[state.bar];
+        }
+        
+        if (isNaN(target) || target < barWeight) return;
+        let rem = (target - barWeight) / 2;
         const result = [];
         const inv = { ...state.inventory[state.unit] };
         DATA[state.unit].list.forEach(w => {
