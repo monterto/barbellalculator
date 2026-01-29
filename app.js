@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSettingsHighlights() {
         document.querySelectorAll('.unit-select').forEach(btn => btn.classList.toggle('active', btn.dataset.unit === state.unit));
         document.querySelectorAll('.bar-select').forEach(btn => btn.classList.toggle('active', btn.dataset.bar === state.bar));
+        document.querySelectorAll('.theme-select').forEach(btn => btn.classList.toggle('active', btn.dataset.theme === state.theme));
     }
 
     function renderPlates() {
@@ -202,11 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.plates = result; updateUI();
     };
 
-    document.getElementById('theme-toggle').onclick = () => {
-        state.theme = state.theme === 'light' ? 'dark' : 'light';
-        document.body.className = state.theme; save();
-    };
-
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
         state.unit = e.target.dataset.unit; state.plates = [];
         buildControls(); renderInventory(); updateUI();
@@ -216,6 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
         state.bar = e.target.dataset.bar;
         updateUI();
     });
+
+    document.querySelectorAll('.theme-select').forEach(b => b.onclick = (e) => {
+        state.theme = e.target.dataset.theme;
+        document.body.className = state.theme;
+        updateSettingsHighlights();
+        save();
+    });
+
+    document.getElementById('unit-info-btn').onclick = () => {
+        const infoMsg = document.getElementById('unit-info-message');
+        infoMsg.classList.toggle('show');
+    };
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 
