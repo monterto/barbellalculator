@@ -104,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
             txt.setAttribute("y", centerY + 7);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
             
-            // Text scale logic
-            const fontSize = svgW < 20 ? 11 : 16;
+            // Increased text scale for better readability
+            const fontSize = svgW < 20 ? 14 : 20;
             txt.style.fontSize = `${fontSize}px`;
             txt.style.fontWeight = "bold";
             txt.textContent = w;
