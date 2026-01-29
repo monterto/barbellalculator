@@ -124,11 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('unit-label').textContent = state.unit;
-        document.getElementById('side-weight').textContent = sideWeight.toFixed(1);
-        
-        // Update added weight label
-        const addedLabel = document.querySelector('.added-label');
-        addedLabel.textContent = `${state.unit} per side`;
+        document.getElementById('side-weight').textContent = totalAddedWeight.toFixed(1);
 
         updateSettingsHighlights();
         renderPlates();
