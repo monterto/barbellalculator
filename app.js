@@ -73,6 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const thicknessBase = 48; 
             let svgW = (w / maxWeight) * thicknessBase;
             
+            // Make 10 the same width as 15 for better text readability
+            if (w === 10) {
+                const fifteenWeight = state.unit === 'lbs' ? 15 : 10;
+                svgW = (fifteenWeight / maxWeight) * thicknessBase;
+            }
+            
             // Readability: Clamp minimum width for smaller plates
             if (w <= 5) svgW = Math.max(svgW, 18);
 
