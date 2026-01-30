@@ -35,7 +35,7 @@
     --yellow: #fbbf24;
     --green: #10b981;
     --white: #f9fafb;
-    --black: #1f2937;
+    --black: #2a2a2a;
 }
 
 /* ============================================
@@ -104,6 +104,11 @@ body {
                 0 3px 6px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hide when settings modal is open */
+body.settings-open .floating-settings-btn {
+    display: none;
 }
 
 .floating-settings-btn:active {
@@ -635,6 +640,13 @@ main {
     letter-spacing: 0.8px;
     margin-bottom: 8px;
     margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bar-category-header .info-btn {
+    margin-left: 2px;
 }
 
 .bar-selection-list {

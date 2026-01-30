@@ -164,8 +164,16 @@ document.addEventListener('DOMContentLoaded', () => {
             rect.setAttribute("x", xOffset); rect.setAttribute("y", y);
             rect.setAttribute("width", svgW); rect.setAttribute("height", svgH);
             rect.setAttribute("fill", p.color); rect.setAttribute("rx", 4);
-            rect.setAttribute("stroke", "rgba(0,0,0,0.4)");
-            rect.setAttribute("stroke-width", "1.5");
+            
+            // Enhanced contrast for dark plates (black and gray)
+            if (p.color === 'var(--black)' || p.color === '#777') {
+                rect.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
+                rect.setAttribute("stroke-width", "1.5");
+            } else {
+                rect.setAttribute("stroke", "rgba(0,0,0,0.4)");
+                rect.setAttribute("stroke-width", "1.5");
+            }
+            
             g.appendChild(rect);
 
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -322,8 +330,24 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCustomBars();
         updateSettingsHighlights();
         document.getElementById('settings-modal').classList.remove('hidden');
+        document.body.classList.add('settings-open');
+        
+        // Push state for back button support
+        window.history.pushState({ modal: 'settings' }, '');
     };
-    document.getElementById('close-modal').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
+    
+    function closeSettingsModal() {
+        document.getElementById('settings-modal').classList.add('hidden');
+        document.body.classList.remove('settings-open');
+    }
+    
+    document.getElementById('close-modal').onclick = () => {
+        closeSettingsModal();
+        // Go back in history if we pushed a state
+        if (window.history.state && window.history.state.modal) {
+            window.history.back();
+        }
+    };
     
     document.getElementById('inventory-toggle').onclick = function() {
         const content = document.getElementById('inventory-section');
@@ -353,11 +377,35 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.unit === selectedCustomBarUnit);
         });
+        
+        // Push state for back button support
+        window.history.pushState({ modal: 'customBar' }, '');
     };
     
-    document.getElementById('close-custom-bar-modal').onclick = () => {
+    function closeCustomBarModal() {
         document.getElementById('custom-bar-modal').classList.add('hidden');
+    }
+    
+    document.getElementById('close-custom-bar-modal').onclick = () => {
+        closeCustomBarModal();
+        // Go back in history if we pushed a state
+        if (window.history.state && window.history.state.modal) {
+            window.history.back();
+        }
     };
+    
+    // Handle browser back button
+    window.addEventListener('popstate', (event) => {
+        // Close any open modals when back button is pressed
+        const settingsModal = document.getElementById('settings-modal');
+        const customBarModal = document.getElementById('custom-bar-modal');
+        
+        if (!customBarModal.classList.contains('hidden')) {
+            closeCustomBarModal();
+        } else if (!settingsModal.classList.contains('hidden')) {
+            closeSettingsModal();
+        }
+    });
     
     document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
         btn.onclick = () => {
@@ -443,14 +491,15 @@ document.addEventListener('DOMContentLoaded', () => {
         infoMsg.classList.toggle('show');
     };
 
-    // Standard bar info button handler (delegated)
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('bar-info-btn')) {
-            e.stopPropagation();
-            const infoMsg = document.getElementById('standard-bar-info-message');
-            infoMsg.classList.toggle('show');
-        }
-    });
+    document.getElementById('standard-bar-info-btn').onclick = () => {
+        const infoMsg = document.getElementById('standard-bar-info-message');
+        infoMsg.classList.toggle('show');
+    };
+
+    document.getElementById('custom-bar-info-btn').onclick = () => {
+        const infoMsg = document.getElementById('custom-bar-info-message');
+        infoMsg.classList.toggle('show');
+    };
 
     // Unified bar selection handlers (delegated to support dynamic custom bars)
     document.addEventListener('click', (e) => {
