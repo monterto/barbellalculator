@@ -399,8 +399,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close any open modals when back button is pressed
         const settingsModal = document.getElementById('settings-modal');
         const customBarModal = document.getElementById('custom-bar-modal');
+        const infoDialog = document.getElementById('info-dialog');
         
-        if (!customBarModal.classList.contains('hidden')) {
+        if (!infoDialog.classList.contains('hidden')) {
+            closeInfoDialog();
+        } else if (!customBarModal.classList.contains('hidden')) {
             closeCustomBarModal();
         } else if (!settingsModal.classList.contains('hidden')) {
             closeSettingsModal();
@@ -481,24 +484,71 @@ document.addEventListener('DOMContentLoaded', () => {
         save();
     });
 
+    // Info dialog system
+    const infoMessages = {
+        unit: {
+            title: "Plate & Barbell Type",
+            message: "<strong>KG</strong> follows Olympic weightlifting standards for barbells and plates.<br><br><strong>LBS</strong> follows commercial gym standards for barbells and plates."
+        },
+        standardBar: {
+            title: "Standard Barbells",
+            message: "<strong>Men's:</strong> 45 lbs / 20 kg<br><br><strong>Women's:</strong> 33 lbs / 15 kg<br><br><strong>No Bar:</strong> 0 lbs / 0 kg"
+        },
+        customBar: {
+            title: "Custom Barbells",
+            message: "Custom bars automatically convert between units. A 60 lb bar will show as 27.25 kg when switching to KG mode (or 27.2 kg with Higher Precision enabled)."
+        },
+        precision: {
+            title: "Higher Precision",
+            message: "<strong>Off:</strong> Rounds to nearest 0.5 lb / 0.25 kg (practical for most gym plates)<br><br><strong>On:</strong> Shows 0.1 lb / 0.1 kg precision (useful for exact conversions)"
+        }
+    };
+
+    function showInfoDialog(title, message) {
+        const dialog = document.getElementById('info-dialog');
+        const titleEl = document.getElementById('info-dialog-title');
+        const messageEl = document.getElementById('info-dialog-message');
+        
+        titleEl.textContent = title;
+        messageEl.innerHTML = message;
+        dialog.classList.remove('hidden');
+        
+        // Push state for back button support
+        window.history.pushState({ modal: 'infoDialog' }, '');
+    }
+
+    function closeInfoDialog() {
+        document.getElementById('info-dialog').classList.add('hidden');
+    }
+
+    document.getElementById('close-info-dialog').onclick = () => {
+        closeInfoDialog();
+        if (window.history.state && window.history.state.modal === 'infoDialog') {
+            window.history.back();
+        }
+    };
+
+    document.getElementById('info-dialog-ok').onclick = () => {
+        closeInfoDialog();
+        if (window.history.state && window.history.state.modal === 'infoDialog') {
+            window.history.back();
+        }
+    };
+
     document.getElementById('unit-info-btn').onclick = () => {
-        const infoMsg = document.getElementById('unit-info-message');
-        infoMsg.classList.toggle('show');
+        showInfoDialog(infoMessages.unit.title, infoMessages.unit.message);
     };
 
     document.getElementById('precision-info-btn').onclick = () => {
-        const infoMsg = document.getElementById('precision-info-message');
-        infoMsg.classList.toggle('show');
+        showInfoDialog(infoMessages.precision.title, infoMessages.precision.message);
     };
 
     document.getElementById('standard-bar-info-btn').onclick = () => {
-        const infoMsg = document.getElementById('standard-bar-info-message');
-        infoMsg.classList.toggle('show');
+        showInfoDialog(infoMessages.standardBar.title, infoMessages.standardBar.message);
     };
 
     document.getElementById('custom-bar-info-btn').onclick = () => {
-        const infoMsg = document.getElementById('custom-bar-info-message');
-        infoMsg.classList.toggle('show');
+        showInfoDialog(infoMessages.customBar.title, infoMessages.customBar.message);
     };
 
     // Unified bar selection handlers (delegated to support dynamic custom bars)

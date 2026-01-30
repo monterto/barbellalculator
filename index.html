@@ -51,7 +51,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Settings</h3>
-                <button id="close-modal">&times;</button>
+                <button id="close-modal" class="modal-close-btn">&times;</button>
             </div>
             <div class="setting-item">
                 <label>
@@ -61,11 +61,6 @@
                 <div class="segmented-control">
                     <button class="unit-select" data-unit="lbs">LBS</button>
                     <button class="unit-select" data-unit="kg">KG</button>
-                </div>
-                <div class="info-message" id="unit-info-message">
-                    <strong>KG</strong> follows Olympic weightlifting standards for barbells and plates.
-                    <br><br>
-                    <strong>LBS</strong> follows commercial gym standards for barbells and plates.
                 </div>
             </div>
             <div class="setting-item">
@@ -108,18 +103,6 @@
                     <span class="plus-icon">+</span>
                     <span>Add Custom Bar</span>
                 </button>
-                
-                <div class="info-message" id="standard-bar-info-message">
-                    <strong>Men's:</strong> 45 lbs / 20 kg
-                    <br><br>
-                    <strong>Women's:</strong> 33 lbs / 15 kg
-                    <br><br>
-                    <strong>No Bar:</strong> 0 lbs / 0 kg
-                </div>
-                
-                <div class="info-message" id="custom-bar-info-message">
-                    Custom bars automatically convert between units. A 60 lb bar will show as 27.25 kg when switching to KG mode (or 27.2 kg with Higher Precision enabled).
-                </div>
             </div>
             <div class="setting-item">
                 <label>
@@ -129,11 +112,6 @@
                 <div class="segmented-control">
                     <button class="precision-select" data-precision="false">Off</button>
                     <button class="precision-select" data-precision="true">On</button>
-                </div>
-                <div class="info-message" id="precision-info-message">
-                    <strong>Off:</strong> Rounds to nearest 0.5 lb / 0.25 kg (practical for most gym plates)
-                    <br><br>
-                    <strong>On:</strong> Shows 0.1 lb / 0.1 kg precision (useful for exact conversions)
                 </div>
             </div>
             <div class="setting-item">
@@ -160,7 +138,7 @@
         <div class="modal-content custom-bar-modal-content">
             <div class="modal-header">
                 <h3>Add Custom Bar</h3>
-                <button id="close-custom-bar-modal">&times;</button>
+                <button id="close-custom-bar-modal" class="modal-close-btn">&times;</button>
             </div>
             <div class="custom-bar-form">
                 <div class="form-group">
@@ -180,6 +158,18 @@
                 </div>
                 <button id="save-custom-bar-modal" class="save-custom-bar-btn">Save Custom Bar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Info Dialog -->
+    <div id="info-dialog" class="info-dialog hidden">
+        <div class="info-dialog-content">
+            <div class="info-dialog-header">
+                <h4 id="info-dialog-title">Information</h4>
+                <button id="close-info-dialog" class="dialog-close-btn">&times;</button>
+            </div>
+            <div id="info-dialog-message" class="info-dialog-message"></div>
+            <button id="info-dialog-ok" class="info-dialog-ok-btn">Got it</button>
         </div>
     </div>
 

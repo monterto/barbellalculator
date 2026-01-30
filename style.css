@@ -517,14 +517,14 @@ main {
     background-clip: text;
 }
 
-#close-modal {
-    width: 32px;
-    height: 32px;
+.modal-close-btn {
+    width: 36px;
+    height: 36px;
     border: none;
     background: var(--bg);
     color: var(--text);
-    font-size: 1.4rem;
-    border-radius: 8px;
+    font-size: 1.5rem;
+    border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -532,10 +532,116 @@ main {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 300;
     line-height: 1;
+    border: 2px solid var(--border);
 }
 
-#close-modal:active {
+.modal-close-btn:active {
     transform: scale(0.9);
+    background: var(--card);
+}
+
+/* ============================================
+   INFO DIALOG - Compact overlay for info messages
+   ============================================ */
+.info-dialog {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.info-dialog-content {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.info-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.info-dialog-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.dialog-close-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1.3rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 300;
+    line-height: 1;
+    border: 2px solid var(--border);
+}
+
+.dialog-close-btn:active {
+    transform: scale(0.9);
+    background: var(--card);
+}
+
+.info-dialog-message {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 20px;
+}
+
+.info-dialog-message strong {
+    color: var(--accent);
+    font-weight: 800;
+}
+
+.info-dialog-ok-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-dialog-ok-btn:active {
+    transform: scale(0.98);
 }
 
 /* ============================================
@@ -837,39 +943,6 @@ main {
 
 .info-btn:active {
     transform: scale(0.95);
-}
-
-/* Info message styling */
-.info-message {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-top: 8px;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: var(--text);
-    display: none;
-}
-
-.info-message.show {
-    display: block;
-    animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.info-message strong {
-    color: var(--accent);
 }
 
 /* ============================================
