@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
             lbs: { 45: 20, 35: 4, 25: 4, 15: 4, 10: 8, 5: 8, 2.5: 4 },
             kg: { 25: 20, 20: 4, 15: 4, 10: 4, 5: 4, 2.5: 4, 1.25: 4 }
         },
-        customBars: []
+        customBars: [],
+        highPrecision: false
     };
 
     function save() { localStorage.setItem('barLoaderPro_v3', JSON.stringify(state)); }
@@ -51,13 +52,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.className = state.theme;
     }
 
-    // Weight conversion functions
+    // Weight conversion functions with precision rounding
     function lbsToKg(lbs) {
-        return lbs / 2.20462;
+        const kg = lbs / 2.20462;
+        if (state.highPrecision) {
+            // High precision: 0.1 kg increments
+            return Math.round(kg * 10) / 10;
+        } else {
+            // Standard: 0.25 kg increments (practical for weightlifting)
+            return Math.round(kg * 4) / 4;
+        }
     }
 
     function kgToLbs(kg) {
-        return kg * 2.20462;
+        const lbs = kg * 2.20462;
+        if (state.highPrecision) {
+            // High precision: 0.1 lb increments
+            return Math.round(lbs * 10) / 10;
+        } else {
+            // Standard: 0.5 lb increments (practical for weightlifting)
+            return Math.round(lbs * 2) / 2;
+        }
     }
 
     function getCustomBarWeight(customBar, targetUnit) {
@@ -75,10 +90,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return customBar.weight;
     }
 
+    function getCurrentBarName() {
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            if (customBar) {
+                const weight = getCustomBarWeight(customBar, state.unit);
+                return `${customBar.name} (${weight.toFixed(1)} ${state.unit})`;
+            }
+        }
+        
+        const barNames = {
+            men: state.unit === 'lbs' ? "Men's Bar (45 lbs)" : "Men's Bar (20 kg)",
+            women: state.unit === 'lbs' ? "Women's Bar (33 lbs)" : "Women's Bar (15 kg)",
+            zero: "No Bar (0)"
+        };
+        
+        return barNames[state.bar] || '';
+    }
+
     function updateSettingsHighlights() {
         document.querySelectorAll('.unit-select').forEach(btn => btn.classList.toggle('active', btn.dataset.unit === state.unit));
-        document.querySelectorAll('.bar-select').forEach(btn => btn.classList.toggle('active', btn.dataset.bar === state.bar));
         document.querySelectorAll('.theme-select').forEach(btn => btn.classList.toggle('active', btn.dataset.theme === state.theme));
+        document.querySelectorAll('.precision-select').forEach(btn => btn.classList.toggle('active', btn.dataset.precision === state.highPrecision.toString()));
+        
+        // Update bar options
+        document.querySelectorAll('.bar-option').forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.bar === state.bar);
+        });
+        
+        // Update bar type label on viz
+        const barLabel = document.getElementById('bar-type-label');
+        if (barLabel) {
+            barLabel.textContent = getCurrentBarName();
+        }
     }
 
     function renderPlates() {
@@ -172,24 +216,27 @@ document.addEventListener('DOMContentLoaded', () => {
         
         state.customBars.forEach(preset => {
             const div = document.createElement('div');
-            div.className = `custom-bar-preset ${state.bar === preset.id ? 'active' : ''}`;
+            div.className = `bar-option ${state.bar === preset.id ? 'active' : ''}`;
+            div.dataset.bar = preset.id;
+            
+            const radio = document.createElement('div');
+            radio.className = 'radio-circle';
             
             const info = document.createElement('div');
-            info.className = 'preset-info';
+            info.className = 'bar-info';
             info.onclick = () => {
                 state.bar = preset.id;
                 state.plates = [];
                 updateUI();
-                renderCustomBars();
             };
             
-            const name = document.createElement('div');
-            name.className = 'preset-name';
+            const name = document.createElement('span');
+            name.className = 'bar-name';
             name.textContent = preset.name;
             
-            const weight = document.createElement('div');
-            weight.className = 'preset-weight';
-            // Show weight in current unit
+            const weight = document.createElement('span');
+            weight.className = 'bar-weight';
+            // Show weight in current unit with live conversion
             const displayWeight = getCustomBarWeight(preset, state.unit);
             weight.textContent = `${displayWeight.toFixed(1)} ${state.unit}`;
             
@@ -197,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             info.appendChild(weight);
             
             const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-preset-btn';
+            deleteBtn.className = 'delete-bar-btn';
             deleteBtn.textContent = 'Delete';
             deleteBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -210,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateUI();
             };
             
+            div.appendChild(radio);
             div.appendChild(info);
             div.appendChild(deleteBtn);
             list.appendChild(div);
@@ -372,11 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
         state.unit = e.target.dataset.unit; state.plates = [];
-        buildControls(); renderInventory(); updateUI();
-    });
-
-    document.querySelectorAll('.bar-select').forEach(b => b.onclick = (e) => {
-        state.bar = e.target.dataset.bar;
+        buildControls(); 
+        renderInventory(); 
+        renderCustomBars(); // Re-render to show live-updated weights
         updateUI();
     });
 
@@ -392,10 +438,35 @@ document.addEventListener('DOMContentLoaded', () => {
         infoMsg.classList.toggle('show');
     };
 
-    document.getElementById('barbell-info-btn').onclick = () => {
-        const infoMsg = document.getElementById('barbell-info-message');
+    document.getElementById('precision-info-btn').onclick = () => {
+        const infoMsg = document.getElementById('precision-info-message');
         infoMsg.classList.toggle('show');
     };
+
+    // Standard bar info button handler (delegated)
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('bar-info-btn')) {
+            e.stopPropagation();
+            const infoMsg = document.getElementById('standard-bar-info-message');
+            infoMsg.classList.toggle('show');
+        }
+    });
+
+    // Unified bar selection handlers (delegated to support dynamic custom bars)
+    document.addEventListener('click', (e) => {
+        const barOption = e.target.closest('.bar-option');
+        if (barOption && !e.target.classList.contains('delete-bar-btn') && !e.target.classList.contains('bar-info-btn')) {
+            state.bar = barOption.dataset.bar;
+            state.plates = [];
+            updateUI();
+        }
+    });
+
+    document.querySelectorAll('.precision-select').forEach(b => b.onclick = (e) => {
+        state.highPrecision = e.target.dataset.precision === 'true';
+        renderCustomBars(); // Re-render to update displayed weights
+        updateUI();
+    });
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 

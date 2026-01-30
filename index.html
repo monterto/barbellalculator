@@ -13,6 +13,7 @@
 
     <main>
         <div class="viz-card">
+            <div class="bar-type-label" id="bar-type-label">Men's Bar (45 lbs)</div>
             <div class="stats-overlay">
                 <div class="added-weight-display">
                     <span class="added-value" id="side-weight">0.0</span>
@@ -68,30 +69,62 @@
                 </div>
             </div>
             <div class="setting-item">
-                <label>
-                    Barbell Weight
-                    <button class="info-btn" id="barbell-info-btn">i</button>
-                </label>
-                <div class="segmented-control">
-                    <button class="bar-select" data-bar="men">Men's</button>
-                    <button class="bar-select" data-bar="women">Women's</button>
-                    <button class="bar-select" data-bar="zero">No Bar</button>
+                <label>Select Barbell</label>
+                
+                <div class="bar-category-header">STANDARD BARBELLS</div>
+                <div class="bar-selection-list">
+                    <div class="bar-option" data-bar="men">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">Men's</span>
+                            <span class="bar-weight">45 lbs / 20 kg</span>
+                        </div>
+                        <button class="info-btn bar-info-btn" data-info="men">i</button>
+                    </div>
+                    <div class="bar-option" data-bar="women">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">Women's</span>
+                            <span class="bar-weight">33 lbs / 15 kg</span>
+                        </div>
+                        <button class="info-btn bar-info-btn" data-info="women">i</button>
+                    </div>
+                    <div class="bar-option" data-bar="zero">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">No Bar</span>
+                            <span class="bar-weight">0 lbs / 0 kg</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-message" id="barbell-info-message">
-                    <strong>Men's:</strong> 45 lbs / 20 kg
-                    <br><br>
-                    <strong>Women's:</strong> 33 lbs / 15 kg
-                    <br><br>
-                    <strong>No Bar:</strong> 0 lbs / 0 kg
-                </div>
-            </div>
-            <div class="setting-item">
-                <label>Custom Bar Presets</label>
+                
+                <div class="bar-category-header" style="margin-top: 12px;">CUSTOM BARBELLS</div>
+                <div id="custom-bar-list" class="bar-selection-list"></div>
                 <button id="add-custom-bar-btn" class="add-custom-bar-btn">
                     <span class="plus-icon">+</span>
                     <span>Add Custom Bar</span>
                 </button>
-                <div id="custom-bar-list" class="custom-bar-presets"></div>
+                
+                <div class="info-message" id="standard-bar-info-message">
+                    <strong>Men's:</strong> 45 lbs / 20 kg
+                    <br><br>
+                    <strong>Women's:</strong> 33 lbs / 15 kg
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>
+                    Higher Precision
+                    <button class="info-btn" id="precision-info-btn">i</button>
+                </label>
+                <div class="segmented-control">
+                    <button class="precision-select" data-precision="false">Off</button>
+                    <button class="precision-select" data-precision="true">On</button>
+                </div>
+                <div class="info-message" id="precision-info-message">
+                    <strong>Off:</strong> Rounds to nearest 0.5 lb / 0.25 kg (practical for most gym plates)
+                    <br><br>
+                    <strong>On:</strong> Shows 0.1 lb / 0.1 kg precision (useful for exact conversions)
+                </div>
             </div>
             <div class="setting-item">
                 <button class="collapsible-header" id="inventory-toggle">

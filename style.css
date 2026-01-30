@@ -163,6 +163,25 @@ main {
     pointer-events: none;
 }
 
+/* Bar type label - top center */
+.bar-type-label {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 6px var(--shadow);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text);
+    z-index: 10;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 #barbell-viz {
     width: 100%;
     height: 100%;
@@ -594,7 +613,7 @@ main {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-top: 8px;
 }
 
 .add-custom-bar-btn:active {
@@ -605,6 +624,117 @@ main {
     font-size: 1.4rem;
     font-weight: 700;
     line-height: 1;
+}
+
+/* Bar selection unified interface */
+.bar-category-header {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+
+.bar-selection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bar-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.bar-option:active {
+    transform: scale(0.98);
+}
+
+.bar-option.active {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.radio-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.bar-option.active .radio-circle {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.bar-option.active .radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+}
+
+.bar-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bar-name {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.bar-weight {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.bar-info-btn {
+    flex-shrink: 0;
+}
+
+.delete-bar-btn {
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.delete-bar-btn:hover {
+    background: var(--bg);
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.delete-bar-btn:active {
+    transform: scale(0.95);
 }
 
 /* Custom bar modal */
@@ -672,70 +802,6 @@ main {
 
 .save-custom-bar-btn:active {
     transform: scale(0.98);
-}
-
-/* Custom bar presets list */
-.custom-bar-presets {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.custom-bar-preset {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    background: var(--bg);
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.custom-bar-preset.active {
-    border-color: var(--accent);
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.preset-info {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    cursor: pointer;
-}
-
-.preset-name {
-    font-weight: 800;
-    font-size: 0.9rem;
-    color: var(--text);
-}
-
-.preset-weight {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-.delete-preset-btn {
-    padding: 6px 10px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.delete-preset-btn:hover {
-    background: var(--bg);
-    color: #ef4444;
-    border-color: #ef4444;
-}
-
-.delete-preset-btn:active {
-    transform: scale(0.95);
 }
 
 /* Info button styling */
