@@ -87,16 +87,15 @@
             </div>
             <div class="setting-item">
                 <label>Custom Bar Presets</label>
-                <div class="custom-bar-input">
-                    <input type="text" id="custom-bar-name" placeholder="Preset name" maxlength="20">
-                    <input type="number" id="custom-bar-weight" placeholder="Weight" inputmode="decimal">
-                    <button id="save-custom-bar" class="add-preset-btn">Save</button>
-                </div>
+                <button id="add-custom-bar-btn" class="add-custom-bar-btn">
+                    <span class="plus-icon">+</span>
+                    <span>Add Custom Bar</span>
+                </button>
                 <div id="custom-bar-list" class="custom-bar-presets"></div>
             </div>
             <div class="setting-item">
                 <button class="collapsible-header" id="inventory-toggle">
-                    <span>Plate Inventory (Per Side)</span>
+                    <span>Plate Inventory (Total)</span>
                     <span class="toggle-icon">▼</span>
                 </button>
                 <div id="inventory-section" class="collapsible-content hidden">
@@ -112,6 +111,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Custom Bar Modal -->
+    <div id="custom-bar-modal" class="modal hidden">
+        <div class="modal-content custom-bar-modal-content">
+            <div class="modal-header">
+                <h3>Add Custom Bar</h3>
+                <button id="close-custom-bar-modal">&times;</button>
+            </div>
+            <div class="custom-bar-form">
+                <div class="form-group">
+                    <label>Bar Name</label>
+                    <input type="text" id="custom-bar-name-input" placeholder="e.g., Trap Bar" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>Weight</label>
+                    <input type="number" id="custom-bar-weight-input" placeholder="Enter weight" inputmode="decimal" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <div class="segmented-control">
+                        <button class="custom-bar-unit-select" data-unit="lbs">LBS</button>
+                        <button class="custom-bar-unit-select active" data-unit="kg">KG</button>
+                    </div>
+                </div>
+                <button id="save-custom-bar-modal" class="save-custom-bar-btn">Save Custom Bar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

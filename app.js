@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         theme: 'dark', // Defaulting state to dark
         plates: [],
         inventory: {
-            lbs: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
-            kg: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
+            lbs: { 45: 20, 35: 4, 25: 4, 15: 4, 10: 8, 5: 8, 2.5: 4 },
+            kg: { 25: 20, 20: 4, 15: 4, 10: 4, 5: 4, 2.5: 4, 1.25: 4 }
         },
         customBars: []
     };
@@ -49,6 +49,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const saved = localStorage.getItem('barLoaderPro_v3');
         if (saved) state = { ...state, ...JSON.parse(saved) };
         document.body.className = state.theme;
+    }
+
+    // Weight conversion functions
+    function lbsToKg(lbs) {
+        return lbs / 2.20462;
+    }
+
+    function kgToLbs(kg) {
+        return kg * 2.20462;
+    }
+
+    function getCustomBarWeight(customBar, targetUnit) {
+        // Custom bars store weight in their original unit
+        if (customBar.unit === targetUnit) {
+            return customBar.weight;
+        }
+        // Convert if different unit
+        if (targetUnit === 'kg' && customBar.unit === 'lbs') {
+            return lbsToKg(customBar.weight);
+        }
+        if (targetUnit === 'lbs' && customBar.unit === 'kg') {
+            return kgToLbs(customBar.weight);
+        }
+        return customBar.weight;
     }
 
     function updateSettingsHighlights() {
@@ -123,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if custom bar is selected
         if (state.bar.startsWith('custom-')) {
             const customBar = state.customBars.find(b => b.id === state.bar);
-            barWeight = customBar ? customBar.weight : 0;
+            barWeight = customBar ? getCustomBarWeight(customBar, state.unit) : 0;
         } else {
             barWeight = config.bar[state.bar];
         }
@@ -137,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('side-weight').textContent = totalAddedWeight.toFixed(1);
 
         updateSettingsHighlights();
+        buildControls(); // Rebuild controls to update button states
         renderPlates();
         save();
     }
@@ -164,7 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const weight = document.createElement('div');
             weight.className = 'preset-weight';
-            weight.textContent = `${preset.weight} ${preset.unit}`;
+            // Show weight in current unit
+            const displayWeight = getCustomBarWeight(preset, state.unit);
+            weight.textContent = `${displayWeight.toFixed(1)} ${state.unit}`;
             
             info.appendChild(name);
             info.appendChild(weight);
@@ -200,7 +227,25 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.style.backgroundColor = DATA[state.unit].plates[w].color;
             if(DATA[state.unit].plates[w].darkTxt) btn.style.color = '#111';
             btn.textContent = w;
-            btn.onclick = () => { state.plates.push(w); state.plates.sort((a,b)=>b-a); updateUI(); };
+            
+            // Count how many of this plate are currently on the bar (both sides)
+            const onBar = state.plates.filter(p => p === w).length * 2;
+            // Check if at least 2 plates available (need a pair)
+            const available = state.inventory[state.unit][w] - onBar;
+            
+            btn.onclick = () => { 
+                if (available >= 2) {
+                    state.plates.push(w); 
+                    state.plates.sort((a,b)=>b-a); 
+                    updateUI();
+                }
+            };
+            
+            // Disable button if less than 2 available
+            if (available < 2) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
             
             const rem = document.createElement('button');
             rem.className = 'remove-btn'; rem.textContent = 'Remove';
@@ -247,9 +292,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    document.getElementById('save-custom-bar').onclick = () => {
-        const name = document.getElementById('custom-bar-name').value.trim();
-        const weight = parseFloat(document.getElementById('custom-bar-weight').value);
+    // Custom bar modal handlers
+    let selectedCustomBarUnit = 'lbs';
+    
+    document.getElementById('add-custom-bar-btn').onclick = () => {
+        selectedCustomBarUnit = state.unit; // Default to current unit
+        document.getElementById('custom-bar-modal').classList.remove('hidden');
+        document.getElementById('custom-bar-name-input').value = '';
+        document.getElementById('custom-bar-weight-input').value = '';
+        
+        // Update unit selection
+        document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.unit === selectedCustomBarUnit);
+        });
+    };
+    
+    document.getElementById('close-custom-bar-modal').onclick = () => {
+        document.getElementById('custom-bar-modal').classList.add('hidden');
+    };
+    
+    document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
+        btn.onclick = () => {
+            selectedCustomBarUnit = btn.dataset.unit;
+            document.querySelectorAll('.custom-bar-unit-select').forEach(b => {
+                b.classList.toggle('active', b.dataset.unit === selectedCustomBarUnit);
+            });
+        };
+    });
+    
+    document.getElementById('save-custom-bar-modal').onclick = () => {
+        const name = document.getElementById('custom-bar-name-input').value.trim();
+        const weight = parseFloat(document.getElementById('custom-bar-weight-input').value);
         
         if (!name || isNaN(weight) || weight < 0) {
             return;
@@ -259,16 +332,15 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'custom-' + Date.now(),
             name: name,
             weight: weight,
-            unit: state.unit
+            unit: selectedCustomBarUnit
         };
         
         state.customBars.push(preset);
         save();
         renderCustomBars();
         
-        // Clear inputs
-        document.getElementById('custom-bar-name').value = '';
-        document.getElementById('custom-bar-weight').value = '';
+        // Close modal
+        document.getElementById('custom-bar-modal').classList.add('hidden');
     };
     
     document.getElementById('calc-btn').onclick = () => {
@@ -277,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let barWeight;
         if (state.bar.startsWith('custom-')) {
             const customBar = state.customBars.find(b => b.id === state.bar);
-            barWeight = customBar ? customBar.weight : 0;
+            barWeight = customBar ? getCustomBarWeight(customBar, state.unit) : 0;
         } else {
             barWeight = DATA[state.unit].bar[state.bar];
         }
@@ -287,9 +359,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = [];
         const inv = { ...state.inventory[state.unit] };
         DATA[state.unit].list.forEach(w => {
-            while (rem >= w && inv[w] > 0) { result.push(w); rem = Math.round((rem-w)*100)/100; inv[w]--; }
+            // Only add plates if we have at least 2 available (for both sides)
+            while (rem >= w && inv[w] >= 2) { 
+                result.push(w); 
+                rem = Math.round((rem-w)*100)/100; 
+                inv[w] -= 2; // Remove a pair
+            }
         });
-        state.plates = result; updateUI();
+        state.plates = result; 
+        updateUI();
     };
 
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
