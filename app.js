@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         return barNames[state.bar] || "Men's Bar (45 lbs)"; // Fallback to default
     }
-    }
 
     function updateSettingsHighlights() {
         document.querySelectorAll('.unit-select').forEach(btn => btn.classList.toggle('active', btn.dataset.unit === state.unit));
@@ -681,7 +680,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
         state.unit = e.target.dataset.unit; 
         state.plates = [];
-        buildControls(); 
         renderInventory(); 
         renderCustomBars(); // Re-render to show live-updated weights
         updateUI(true); // Rebuild controls since unit changed
@@ -854,6 +852,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize app
     load();
-    buildControls();
-    updateUI(true); // Initial render with controls built
+    updateUI(true); // Initial render - this will call buildControls()
 });
