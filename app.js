@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
         theme: 'dark', // Will be set by load() based on saved preference or system
         plates: [],
         inventory: {
-            lbs: { 45: 20, 35: 4, 25: 4, 15: 4, 10: 8, 5: 8, 2.5: 4 },
-            kg: { 25: 20, 20: 4, 15: 4, 10: 4, 5: 4, 2.5: 4, 1.25: 4 }
+            lbs: { 45: 99, 35: 99, 25: 99, 15: 99, 10: 99, 5: 99, 2.5: 99 },
+            kg: { 25: 99, 20: 99, 15: 99, 10: 99, 5: 99, 2.5: 99, 1.25: 99 }
         },
         customBars: [],
         highPrecision: false
