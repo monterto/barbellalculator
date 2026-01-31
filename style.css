@@ -555,6 +555,10 @@ main {
     backdrop-filter: blur(4px);
 }
 
+.info-dialog.hidden {
+    display: none;
+}
+
 .info-dialog-content {
     background: var(--card);
     border-radius: 20px;
