@@ -396,14 +396,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Handle browser back button
     window.addEventListener('popstate', (event) => {
-        // Close any open modals when back button is pressed
+        // Check what's open and close in order
         const settingsModal = document.getElementById('settings-modal');
         const customBarModal = document.getElementById('custom-bar-modal');
         const infoDialog = document.getElementById('info-dialog');
         
+        // If info dialog is open, close it (it doesn't participate in history)
+        // and don't process the back action further - let the modal stay open
         if (!infoDialog.classList.contains('hidden')) {
             closeInfoDialog();
-        } else if (!customBarModal.classList.contains('hidden')) {
+            // Re-push the current modal state since back button removed it
+            if (!customBarModal.classList.contains('hidden')) {
+                window.history.pushState({ modal: 'customBar' }, '');
+            } else if (!settingsModal.classList.contains('hidden')) {
+                window.history.pushState({ modal: 'settings' }, '');
+            }
+            return; // Don't close the modal
+        }
+        
+        // If info dialog wasn't open, proceed with normal back button behavior
+        if (!customBarModal.classList.contains('hidden')) {
             closeCustomBarModal();
         } else if (!settingsModal.classList.contains('hidden')) {
             closeSettingsModal();
@@ -513,8 +525,8 @@ document.addEventListener('DOMContentLoaded', () => {
         messageEl.innerHTML = message;
         dialog.classList.remove('hidden');
         
-        // Push state for back button support
-        window.history.pushState({ modal: 'infoDialog' }, '');
+        // Don't push history state - info dialog is just a simple overlay
+        // that should close without affecting navigation
     }
 
     function closeInfoDialog() {
@@ -523,16 +535,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('close-info-dialog').onclick = () => {
         closeInfoDialog();
-        if (window.history.state && window.history.state.modal === 'infoDialog') {
-            window.history.back();
-        }
     };
 
     document.getElementById('info-dialog-ok').onclick = () => {
         closeInfoDialog();
-        if (window.history.state && window.history.state.modal === 'infoDialog') {
-            window.history.back();
-        }
     };
 
     document.getElementById('unit-info-btn').onclick = () => {
