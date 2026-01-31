@@ -755,6 +755,10 @@ main {
     gap: 6px;
 }
 
+.bar-category-header-spaced {
+    margin-top: 12px;
+}
+
 .bar-category-header .info-btn {
     margin-left: 2px;
 }

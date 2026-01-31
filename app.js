@@ -3,6 +3,25 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Configuration constants
+    const SVG_CONFIG = {
+        PLATE_START_X: 135,
+        CENTER_Y: 140,
+        THICKNESS_BASE: 48,
+        MAX_DIAMETER: 240,
+        PLATE_SPACING: 3,
+        MIN_SMALL_PLATE_WIDTH: 18,
+        MIN_SMALL_PLATE_HEIGHT: 90,
+        SMALL_PLATE_THRESHOLD: 5
+    };
+    
+    const VALIDATION = {
+        MAX_CUSTOM_BAR_WEIGHT: 1000,
+        MIN_CUSTOM_BAR_WEIGHT: 0.1,
+        MAX_INVENTORY: 999,
+        FLOATING_POINT_EPSILON: 0.001
+    };
+    
     const DATA = {
         lbs: {
             bar: { men: 45, women: 33, zero: 0 },
@@ -35,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         unit: 'lbs', 
         bar: 'men', 
-        theme: 'dark', // Defaulting state to dark
+        theme: 'dark', // Will be set by load() based on saved preference or system
         plates: [],
         inventory: {
             lbs: { 45: 20, 35: 4, 25: 4, 15: 4, 10: 8, 5: 8, 2.5: 4 },
@@ -44,12 +63,46 @@ document.addEventListener('DOMContentLoaded', () => {
         customBars: [],
         highPrecision: false
     };
+    
+    // Counter for generating unique custom bar IDs
+    let customBarIdCounter = 0;
 
-    function save() { localStorage.setItem('barLoaderPro_v3', JSON.stringify(state)); }
+    function getPreferredTheme() {
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
+    }
+
+    function save() {
+        try {
+            localStorage.setItem('barLoaderPro_v3', JSON.stringify(state));
+        } catch (error) {
+            console.error('Failed to save state:', error);
+            // Could add user notification here if needed
+        }
+    }
+    
     function load() {
-        const saved = localStorage.getItem('barLoaderPro_v3');
-        if (saved) state = { ...state, ...JSON.parse(saved) };
-        document.body.className = state.theme;
+        try {
+            const saved = localStorage.getItem('barLoaderPro_v3');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+            } else {
+                // First time user - use system theme preference
+                state.theme = getPreferredTheme();
+            }
+        } catch (error) {
+            console.error('Failed to load state, using defaults:', error);
+            // Use system theme preference as fallback
+            state.theme = getPreferredTheme();
+        }
+        
+        // Apply theme using classList to avoid overwriting other classes
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(state.theme);
     }
 
     // Weight conversion functions with precision rounding
@@ -93,10 +146,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function getCurrentBarName() {
         if (state.bar.startsWith('custom-')) {
             const customBar = state.customBars.find(b => b.id === state.bar);
-            if (customBar) {
-                const weight = getCustomBarWeight(customBar, state.unit);
-                return `${customBar.name} (${weight.toFixed(1)} ${state.unit})`;
+            if (!customBar) {
+                // Bar was deleted, reset to default
+                console.warn('Selected custom bar not found, resetting to default');
+                state.bar = 'men';
+                save();
+                return getCurrentBarName(); // Recursive call with valid bar
             }
+            const weight = getCustomBarWeight(customBar, state.unit);
+            return `${customBar.name} (${weight.toFixed(1)} ${state.unit})`;
         }
         
         const barNames = {
@@ -105,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             zero: "No Bar (0)"
         };
         
-        return barNames[state.bar] || '';
+        return barNames[state.bar] || "Men's Bar (45 lbs)"; // Fallback to default
+    }
     }
 
     function updateSettingsHighlights() {
@@ -132,41 +191,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const weightList = DATA[state.unit].list;
         const maxWeight = Math.max(...weightList);
         
-        let xOffset = 135; 
-        const centerY = 140; 
+        let xOffset = SVG_CONFIG.PLATE_START_X; 
+        const centerY = SVG_CONFIG.CENTER_Y; 
 
         state.plates.forEach(w => {
             const p = config[w];
             
+            // Validate plate exists in config
+            if (!p) {
+                console.error(`Invalid plate weight: ${w} for unit ${state.unit}`);
+                return; // Skip this plate
+            }
+            
             // Scaled up thickness base for better visibility
-            const thicknessBase = 48; 
-            let svgW = (w / maxWeight) * thicknessBase;
+            let svgW = (w / maxWeight) * SVG_CONFIG.THICKNESS_BASE;
             
             // Make 10 the same width as 15 for better text readability
             if (w === 10) {
                 const fifteenWeight = state.unit === 'lbs' ? 15 : 10;
-                svgW = (fifteenWeight / maxWeight) * thicknessBase;
+                svgW = (fifteenWeight / maxWeight) * SVG_CONFIG.THICKNESS_BASE;
             }
             
             // Readability: Clamp minimum width for smaller plates
-            if (w <= 5) svgW = Math.max(svgW, 18);
+            if (w <= SVG_CONFIG.SMALL_PLATE_THRESHOLD) {
+                svgW = Math.max(svgW, SVG_CONFIG.MIN_SMALL_PLATE_WIDTH);
+            }
 
-            const maxDia = 240; 
             const isHeavy = w >= 10;
             
             // Readability: Clamp minimum height for smaller plates
-            let svgH = isHeavy ? maxDia : (p.dia * 14);
-            if (w <= 5) svgH = Math.max(svgH, 90);
+            let svgH = isHeavy ? SVG_CONFIG.MAX_DIAMETER : (p.dia * 14);
+            if (w <= SVG_CONFIG.SMALL_PLATE_THRESHOLD) {
+                svgH = Math.max(svgH, SVG_CONFIG.MIN_SMALL_PLATE_HEIGHT);
+            }
 
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", xOffset); rect.setAttribute("y", y);
-            rect.setAttribute("width", svgW); rect.setAttribute("height", svgH);
-            rect.setAttribute("fill", p.color); rect.setAttribute("rx", 4);
+            rect.setAttribute("x", xOffset); 
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", svgW); 
+            rect.setAttribute("height", svgH);
+            rect.setAttribute("fill", p.color); 
+            rect.setAttribute("rx", 4);
             
             // Enhanced contrast for dark plates (black and gray)
-            if (p.color === 'var(--black)' || p.color === '#777') {
+            if (p.color === 'var(--black)' || p.color === '#777' || p.color === '#222' || p.color === '#555') {
                 rect.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
                 rect.setAttribute("stroke-width", "1.5");
             } else {
@@ -188,19 +258,50 @@ document.addEventListener('DOMContentLoaded', () => {
             txt.textContent = w;
             g.appendChild(txt);
 
-            xOffset += svgW + 3;
+            xOffset += svgW + SVG_CONFIG.PLATE_SPACING;
         });
     }
 
-    function updateUI() {
+    function updateControlStates() {
+        // Update button states without rebuilding entire DOM (performance improvement)
+        DATA[state.unit].list.forEach(w => {
+            const onBar = state.plates.filter(p => p === w).length * 2;
+            const available = state.inventory[state.unit][w] - onBar;
+            
+            // Find the button for this weight using data attribute
+            const btn = document.querySelector(`.plate-btn[data-weight="${w}"]`);
+            if (btn) {
+                if (available < 2) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.disabled = true;
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.disabled = false;
+                }
+            }
+        });
+    }
+
+    function updateUI(rebuildControls = false) {
         const config = DATA[state.unit];
         let barWeight;
         
-        // Check if custom bar is selected
+        // Validate bar type exists
         if (state.bar.startsWith('custom-')) {
             const customBar = state.customBars.find(b => b.id === state.bar);
-            barWeight = customBar ? getCustomBarWeight(customBar, state.unit) : 0;
+            if (!customBar) {
+                console.warn('Selected custom bar not found, resetting to default');
+                state.bar = 'men';
+            }
+            barWeight = customBar ? getCustomBarWeight(customBar, state.unit) : config.bar['men'];
         } else {
+            // Validate standard bar exists
+            if (config.bar[state.bar] === undefined) {
+                console.error(`Invalid bar type: ${state.bar}, resetting to default`);
+                state.bar = 'men';
+            }
             barWeight = config.bar[state.bar];
         }
         
@@ -213,7 +314,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('side-weight').textContent = totalAddedWeight.toFixed(1);
 
         updateSettingsHighlights();
-        buildControls(); // Rebuild controls to update button states
+        
+        // Only rebuild controls when necessary (performance improvement)
+        if (rebuildControls) {
+            buildControls();
+        } else {
+            updateControlStates();
+        }
+        
         renderPlates();
         save();
     }
@@ -280,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'plate-group';
             const btn = document.createElement('button');
             btn.className = 'plate-btn';
+            btn.dataset.weight = w; // Add data attribute for easier finding
             btn.style.backgroundColor = DATA[state.unit].plates[w].color;
             if(DATA[state.unit].plates[w].darkTxt) btn.style.color = '#111';
             btn.textContent = w;
@@ -293,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (available >= 2) {
                     state.plates.push(w); 
                     state.plates.sort((a,b)=>b-a); 
-                    updateUI();
+                    updateUI(); // Don't rebuild controls, just update states
                 }
             };
             
@@ -301,11 +410,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (available < 2) {
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
+                btn.disabled = true;
             }
             
             const rem = document.createElement('button');
             rem.className = 'remove-btn'; rem.textContent = 'Remove';
-            rem.onclick = () => { const i = state.plates.indexOf(w); if(i>-1){state.plates.splice(i,1); updateUI();} };
+            rem.onclick = () => { 
+                const i = state.plates.indexOf(w); 
+                if(i>-1){
+                    state.plates.splice(i,1); 
+                    updateUI(); // Don't rebuild controls, just update states
+                }
+            };
             
             div.append(btn, rem);
             grid.appendChild(div);
@@ -316,12 +432,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('inventory-list');
         list.innerHTML = '';
         DATA[state.unit].list.forEach(w => {
-            const div = document.createElement('div'); div.className = 'inv-item';
+            const div = document.createElement('div'); 
+            div.className = 'inv-item';
             div.innerHTML = `<span>${w} ${state.unit}</span>`;
+            
             const input = document.createElement('input');
-            input.type = 'number'; input.value = state.inventory[state.unit][w];
-            input.onchange = (e) => { state.inventory[state.unit][w] = parseInt(e.target.value) || 0; save(); };
-            div.appendChild(input); list.appendChild(div);
+            input.type = 'number';
+            input.min = '0';
+            input.max = String(VALIDATION.MAX_INVENTORY);
+            input.value = state.inventory[state.unit][w];
+            
+            input.onchange = (e) => {
+                let value = parseInt(e.target.value);
+                
+                // Validate and clamp value
+                if (isNaN(value) || value < 0) {
+                    value = 0;
+                }
+                if (value > VALIDATION.MAX_INVENTORY) {
+                    value = VALIDATION.MAX_INVENTORY;
+                }
+                
+                state.inventory[state.unit][w] = value;
+                input.value = value; // Update display with clamped value
+                save();
+                updateControlStates(); // Update button states based on new inventory
+            };
+            
+            div.appendChild(input); 
+            list.appendChild(div);
         });
     }
 
@@ -331,6 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSettingsHighlights();
         document.getElementById('settings-modal').classList.remove('hidden');
         document.body.classList.add('settings-open');
+        
+        // Focus first button for keyboard accessibility
+        setTimeout(() => {
+            const firstButton = document.querySelector('#settings-modal .unit-select');
+            if (firstButton) firstButton.focus();
+        }, 100);
         
         // Push state for back button support
         window.history.pushState({ modal: 'settings' }, '');
@@ -373,10 +518,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('custom-bar-name-input').value = '';
         document.getElementById('custom-bar-weight-input').value = '';
         
-        // Update unit selection
+        // Update unit selection and ARIA states
         document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.unit === selectedCustomBarUnit);
+            const isActive = btn.dataset.unit === selectedCustomBarUnit;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-checked', isActive.toString());
         });
+        
+        // Focus first input for accessibility
+        setTimeout(() => {
+            document.getElementById('custom-bar-name-input').focus();
+        }, 100);
         
         // Push state for back button support
         window.history.pushState({ modal: 'customBar' }, '');
@@ -426,7 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => {
             selectedCustomBarUnit = btn.dataset.unit;
             document.querySelectorAll('.custom-bar-unit-select').forEach(b => {
-                b.classList.toggle('active', b.dataset.unit === selectedCustomBarUnit);
+                const isActive = b.dataset.unit === selectedCustomBarUnit;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-checked', isActive.toString());
             });
         };
     });
@@ -435,12 +589,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('custom-bar-name-input').value.trim();
         const weight = parseFloat(document.getElementById('custom-bar-weight-input').value);
         
-        if (!name || isNaN(weight) || weight < 0) {
+        // Validate name
+        if (!name) {
+            alert('Please enter a bar name');
+            document.getElementById('custom-bar-name-input').focus();
             return;
         }
         
+        if (name.length > 20) {
+            alert('Bar name must be 20 characters or less');
+            document.getElementById('custom-bar-name-input').focus();
+            return;
+        }
+        
+        // Check for duplicate names (case-insensitive)
+        if (state.customBars.some(b => b.name.toLowerCase() === name.toLowerCase())) {
+            alert('A bar with this name already exists. Please choose a different name.');
+            document.getElementById('custom-bar-name-input').focus();
+            return;
+        }
+        
+        // Validate weight
+        if (isNaN(weight)) {
+            alert('Please enter a valid weight');
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        if (weight <= VALIDATION.MIN_CUSTOM_BAR_WEIGHT) {
+            alert(`Weight must be greater than ${VALIDATION.MIN_CUSTOM_BAR_WEIGHT}`);
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        if (weight > VALIDATION.MAX_CUSTOM_BAR_WEIGHT) {
+            alert(`Weight must be ${VALIDATION.MAX_CUSTOM_BAR_WEIGHT} or less`);
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        // Create preset with unique ID
         const preset = {
-            id: 'custom-' + Date.now(),
+            id: `custom-${Date.now()}-${customBarIdCounter++}`,
             name: name,
             weight: weight,
             unit: selectedCustomBarUnit
@@ -450,8 +640,11 @@ document.addEventListener('DOMContentLoaded', () => {
         save();
         renderCustomBars();
         
-        // Close modal
+        // Close modal and clear history if needed
         document.getElementById('custom-bar-modal').classList.add('hidden');
+        if (window.history.state && window.history.state.modal === 'customBar') {
+            window.history.back();
+        }
     };
     
     document.getElementById('calc-btn').onclick = () => {
@@ -466,32 +659,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (isNaN(target) || target < barWeight) return;
+        
         let rem = (target - barWeight) / 2;
         const result = [];
         const inv = { ...state.inventory[state.unit] };
+        
         DATA[state.unit].list.forEach(w => {
             // Only add plates if we have at least 2 available (for both sides)
-            while (rem >= w && inv[w] >= 2) { 
+            // Use epsilon for floating point comparison
+            while (rem >= w - VALIDATION.FLOATING_POINT_EPSILON && inv[w] >= 2) { 
                 result.push(w); 
-                rem = Math.round((rem-w)*100)/100; 
+                rem = Math.round((rem - w) * 1000) / 1000; // Higher precision rounding
                 inv[w] -= 2; // Remove a pair
             }
         });
+        
         state.plates = result; 
         updateUI();
     };
 
     document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
-        state.unit = e.target.dataset.unit; state.plates = [];
+        state.unit = e.target.dataset.unit; 
+        state.plates = [];
         buildControls(); 
         renderInventory(); 
         renderCustomBars(); // Re-render to show live-updated weights
-        updateUI();
+        updateUI(true); // Rebuild controls since unit changed
     });
 
     document.querySelectorAll('.theme-select').forEach(b => b.onclick = (e) => {
         state.theme = e.target.dataset.theme;
-        document.body.className = state.theme;
+        // Use classList to avoid overwriting other classes like 'settings-open'
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(state.theme);
         updateSettingsHighlights();
         save();
     });
@@ -525,6 +725,11 @@ document.addEventListener('DOMContentLoaded', () => {
         messageEl.innerHTML = message;
         dialog.classList.remove('hidden');
         
+        // Focus the OK button for keyboard accessibility
+        setTimeout(() => {
+            document.getElementById('info-dialog-ok').focus();
+        }, 100);
+        
         // Don't push history state - info dialog is just a simple overlay
         // that should close without affecting navigation
     }
@@ -532,6 +737,52 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeInfoDialog() {
         document.getElementById('info-dialog').classList.add('hidden');
     }
+
+    // Trap focus within modals for accessibility
+    function trapFocus(element) {
+        const focusableElements = element.querySelectorAll(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        
+        if (focusableElements.length === 0) return;
+        
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        const handleTabKey = (e) => {
+            if (e.key === 'Tab') {
+                if (e.shiftKey && document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                } else if (!e.shiftKey && document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            } else if (e.key === 'Escape') {
+                // Close modal on Escape key
+                if (element.id === 'settings-modal') {
+                    closeSettingsModal();
+                    if (window.history.state && window.history.state.modal) {
+                        window.history.back();
+                    }
+                } else if (element.id === 'custom-bar-modal') {
+                    closeCustomBarModal();
+                    if (window.history.state && window.history.state.modal) {
+                        window.history.back();
+                    }
+                } else if (element.id === 'info-dialog') {
+                    closeInfoDialog();
+                }
+            }
+        };
+
+        element.addEventListener('keydown', handleTabKey);
+    }
+
+    // Enable focus trapping for all modals
+    trapFocus(document.getElementById('settings-modal'));
+    trapFocus(document.getElementById('custom-bar-modal'));
+    trapFocus(document.getElementById('info-dialog'));
 
     document.getElementById('close-info-dialog').onclick = () => {
         closeInfoDialog();
@@ -557,13 +808,26 @@ document.addEventListener('DOMContentLoaded', () => {
         showInfoDialog(infoMessages.customBar.title, infoMessages.customBar.message);
     };
 
-    // Unified bar selection handlers (delegated to support dynamic custom bars)
-    document.addEventListener('click', (e) => {
+    // Bar selection click handler - scoped to settings modal for performance
+    const settingsModal = document.getElementById('settings-modal');
+    settingsModal.addEventListener('click', (e) => {
         const barOption = e.target.closest('.bar-option');
-        if (barOption && !e.target.classList.contains('delete-bar-btn') && !e.target.classList.contains('bar-info-btn')) {
-            state.bar = barOption.dataset.bar;
-            state.plates = [];
-            updateUI();
+        if (barOption && !e.target.classList.contains('delete-bar-btn')) {
+            const barId = barOption.dataset.bar;
+            
+            // Validate bar exists before selecting
+            if (barId) {
+                const isValidStandardBar = DATA[state.unit].bar[barId] !== undefined;
+                const isValidCustomBar = state.customBars.some(b => b.id === barId);
+                
+                if (isValidStandardBar || isValidCustomBar) {
+                    state.bar = barId;
+                    state.plates = [];
+                    updateUI();
+                } else {
+                    console.warn(`Invalid bar selected: ${barId}`);
+                }
+            }
         }
     });
 
@@ -575,7 +839,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 
+    // Register service worker for offline support (PWA)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered successfully:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        });
+    }
+
+    // Initialize app
     load();
     buildControls();
-    updateUI();
+    updateUI(true); // Initial render with controls built
 });

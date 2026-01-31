@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barbell Calculator</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
 </head>
 <body class="dark">
-    <button id="settings-btn" class="floating-settings-btn">⚙️</button>
+    <button id="settings-btn" class="floating-settings-btn" aria-label="Open settings">⚙️</button>
 
     <main>
         <div class="viz-card">
-            <div class="bar-type-label" id="bar-type-label">Men's Bar (45 lbs)</div>
+            <div class="bar-type-label" id="bar-type-label" aria-live="polite"></div>
             <div class="stats-overlay">
                 <div class="added-weight-display">
-                    <span class="added-value" id="side-weight">0.0</span>
+                    <span class="added-value" id="side-weight" aria-live="polite">-</span>
                     <span class="added-label">total added</span>
                 </div>
                 <div class="total-weight-display">
-                    <span class="total-value" id="total-weight">45.0</span>
+                    <span class="total-value" id="total-weight" aria-live="polite">-</span>
                     <span class="total-unit" id="unit-label">lbs</span>
                     <span class="total-label">Total Weight</span>
                 </div>
@@ -47,16 +47,16 @@
         <div class="controls-grid" id="controls-grid"></div>
     </main>
 
-    <div id="settings-modal" class="modal hidden">
+    <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
-                <button id="close-modal" class="modal-close-btn">&times;</button>
+                <h3 id="settings-title">Settings</h3>
+                <button id="close-modal" class="modal-close-btn" aria-label="Close settings">&times;</button>
             </div>
             <div class="setting-item">
                 <label>
                     Plate & Barbell Type
-                    <button class="info-btn" id="unit-info-btn">i</button>
+                    <button class="info-btn" id="unit-info-btn" aria-label="More information about plate and barbell types">i</button>
                 </label>
                 <div class="segmented-control">
                     <button class="unit-select" data-unit="lbs">LBS</button>
@@ -68,7 +68,7 @@
                 
                 <div class="bar-category-header">
                     STANDARD BARBELLS
-                    <button class="info-btn" id="standard-bar-info-btn">i</button>
+                    <button class="info-btn" id="standard-bar-info-btn" aria-label="More information about standard barbells">i</button>
                 </div>
                 <div class="bar-selection-list">
                     <div class="bar-option" data-bar="men">
@@ -94,9 +94,9 @@
                     </div>
                 </div>
                 
-                <div class="bar-category-header" style="margin-top: 12px;">
+                <div class="bar-category-header bar-category-header-spaced">
                     CUSTOM BARBELLS
-                    <button class="info-btn" id="custom-bar-info-btn">i</button>
+                    <button class="info-btn" id="custom-bar-info-btn" aria-label="More information about custom barbells">i</button>
                 </div>
                 <div id="custom-bar-list" class="bar-selection-list"></div>
                 <button id="add-custom-bar-btn" class="add-custom-bar-btn">
@@ -107,7 +107,7 @@
             <div class="setting-item">
                 <label>
                     Higher Precision
-                    <button class="info-btn" id="precision-info-btn">i</button>
+                    <button class="info-btn" id="precision-info-btn" aria-label="More information about precision modes">i</button>
                 </label>
                 <div class="segmented-control">
                     <button class="precision-select" data-precision="false">Off</button>
@@ -134,26 +134,26 @@
     </div>
 
     <!-- Custom Bar Modal -->
-    <div id="custom-bar-modal" class="modal hidden">
+    <div id="custom-bar-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="custom-bar-title">
         <div class="modal-content custom-bar-modal-content">
             <div class="modal-header">
-                <h3>Add Custom Bar</h3>
-                <button id="close-custom-bar-modal" class="modal-close-btn">&times;</button>
+                <h3 id="custom-bar-title">Add Custom Bar</h3>
+                <button id="close-custom-bar-modal" class="modal-close-btn" aria-label="Close custom bar dialog">&times;</button>
             </div>
             <div class="custom-bar-form">
                 <div class="form-group">
-                    <label>Bar Name</label>
-                    <input type="text" id="custom-bar-name-input" placeholder="e.g., Trap Bar" maxlength="20">
+                    <label for="custom-bar-name-input">Bar Name</label>
+                    <input type="text" id="custom-bar-name-input" placeholder="e.g., Trap Bar" maxlength="20" aria-required="true">
                 </div>
                 <div class="form-group">
-                    <label>Weight</label>
-                    <input type="number" id="custom-bar-weight-input" placeholder="Enter weight" inputmode="decimal" step="0.1">
+                    <label for="custom-bar-weight-input">Weight</label>
+                    <input type="number" id="custom-bar-weight-input" placeholder="Enter weight" inputmode="decimal" step="0.1" aria-required="true">
                 </div>
                 <div class="form-group">
                     <label>Unit</label>
-                    <div class="segmented-control">
-                        <button class="custom-bar-unit-select" data-unit="lbs">LBS</button>
-                        <button class="custom-bar-unit-select active" data-unit="kg">KG</button>
+                    <div class="segmented-control" role="radiogroup" aria-label="Weight unit">
+                        <button class="custom-bar-unit-select" data-unit="lbs" role="radio" aria-checked="false">LBS</button>
+                        <button class="custom-bar-unit-select" data-unit="kg" role="radio" aria-checked="false">KG</button>
                     </div>
                 </div>
                 <button id="save-custom-bar-modal" class="save-custom-bar-btn">Save Custom Bar</button>
@@ -162,11 +162,11 @@
     </div>
 
     <!-- Info Dialog -->
-    <div id="info-dialog" class="info-dialog hidden">
+    <div id="info-dialog" class="info-dialog hidden" role="alertdialog" aria-modal="true" aria-labelledby="info-dialog-title">
         <div class="info-dialog-content">
             <div class="info-dialog-header">
                 <h4 id="info-dialog-title">Information</h4>
-                <button id="close-info-dialog" class="dialog-close-btn">&times;</button>
+                <button id="close-info-dialog" class="dialog-close-btn" aria-label="Close information dialog">&times;</button>
             </div>
             <div id="info-dialog-message" class="info-dialog-message"></div>
             <button id="info-dialog-ok" class="info-dialog-ok-btn">Got it</button>
