@@ -145,11 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return weight;
     }
 
-    // Get display label for a plate weight
-    function getPlateDisplayLabel(plateWeight) {
-        const baseUnit = DATA[state.plateType].baseUnit;
-        const displayWeight = convertForDisplay(plateWeight, baseUnit);
-        return `${displayWeight.toFixed(1)} ${state.displayUnit}`;
+    // Helper function to format weight display with appropriate decimals
+    function formatWeight(weight) {
+        // Remove trailing zeros but keep necessary precision
+        // 25 → "25", 2.5 → "2.5", 1.25 → "1.25"
+        const formatted = weight.toFixed(2); // Start with 2 decimals
+        return parseFloat(formatted).toString(); // Remove trailing zeros
     }
 
     function getCustomBarWeight(customBar, targetUnit) {
@@ -301,8 +302,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Display weight in current display unit (converted if necessary)
             const baseUnit = DATA[state.plateType].baseUnit;
-            const displayWeight = convertForDisplay(w, baseUnit);
-            txt.textContent = displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1);
+            if (baseUnit === state.displayUnit) {
+                // Native unit - show exact plate value
+                txt.textContent = formatWeight(w);
+            } else {
+                // Converted unit - show converted value
+                const displayWeight = convertForDisplay(w, baseUnit);
+                txt.textContent = formatWeight(displayWeight);
+            }
             
             g.appendChild(txt);
 
@@ -451,8 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if(DATA[state.plateType].plates[w].darkTxt) btn.style.color = '#111';
             
             // Display weight in current display unit
-            const displayWeight = convertForDisplay(w, baseUnit);
-            btn.textContent = displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1);
+            if (baseUnit === state.displayUnit) {
+                // Native unit - show exact plate value (preserves 1.25, 2.5, etc.)
+                btn.textContent = formatWeight(w);
+            } else {
+                // Converted unit - show converted value
+                const displayWeight = convertForDisplay(w, baseUnit);
+                btn.textContent = formatWeight(displayWeight);
+            }
             
             // Count how many of this plate are currently on the bar (both sides)
             const onBar = state.plates.filter(p => p === w).length * 2;
@@ -499,8 +512,16 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'inv-item';
             
             // Display weight in current display unit
-            const displayWeight = convertForDisplay(w, baseUnit);
-            const displayLabel = `${displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1)} ${state.displayUnit}`;
+            let displayLabel;
+            if (baseUnit === state.displayUnit) {
+                // Native unit - show exact plate value
+                displayLabel = `${formatWeight(w)} ${state.displayUnit}`;
+            } else {
+                // Converted unit - show converted value
+                const displayWeight = convertForDisplay(w, baseUnit);
+                displayLabel = `${formatWeight(displayWeight)} ${state.displayUnit}`;
+            }
+            
             div.innerHTML = `<span>${displayLabel}</span>`;
             
             const input = document.createElement('input');
