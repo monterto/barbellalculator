@@ -1,4 +1,4 @@
-const cacheName = 'barcalc-v1'; // Incremented version
+const cacheName = 'barcalc-v2'; // Incremented version
 const staticAssets = [
   './',
   './index.html',
