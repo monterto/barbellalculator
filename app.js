@@ -92,6 +92,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('barLoaderPro_v3');
             if (saved) {
                 const parsed = JSON.parse(saved);
+                
+                // MIGRATION: Handle old state format (unit → plateType/displayUnit)
+                if (parsed.unit !== undefined && parsed.plateType === undefined) {
+                    console.log('Migrating old state format to new format');
+                    
+                    // Migrate unit to plateType and displayUnit
+                    if (parsed.unit === 'lbs') {
+                        parsed.plateType = 'standard';
+                        parsed.displayUnit = 'lbs';
+                    } else if (parsed.unit === 'kg') {
+                        parsed.plateType = 'olympic';
+                        parsed.displayUnit = 'kg';
+                    }
+                    delete parsed.unit;
+                    
+                    // Migrate inventory structure
+                    if (parsed.inventory && parsed.inventory.lbs !== undefined) {
+                        parsed.inventory = {
+                            standard: parsed.inventory.lbs || { 45: 99, 35: 99, 25: 99, 15: 99, 10: 99, 5: 99, 2.5: 99 },
+                            olympic: parsed.inventory.kg || { 25: 99, 20: 99, 15: 99, 10: 99, 5: 99, 2.5: 99, 1.25: 99 }
+                        };
+                    }
+                }
+                
                 state = { ...state, ...parsed };
             } else {
                 // First time user - use system theme preference
@@ -959,16 +983,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 
-    // Register service worker for offline support (PWA)
+    // Register service worker for offline support (PWA) with auto-update
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
-                    console.log('Service Worker registered successfully:', registration.scope);
+                    console.log('[App] Service Worker registered:', registration.scope);
+                    
+                    // Check for updates periodically (every 60 seconds when page is active)
+                    setInterval(() => {
+                        registration.update().then(() => {
+                            console.log('[App] Checked for service worker updates');
+                        });
+                    }, 60000);
+                    
+                    // Handle updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('[App] New service worker found, installing...');
+                        
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New version available
+                                console.log('[App] New version available! Activating...');
+                                // Tell the new service worker to skip waiting
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
                 })
                 .catch(error => {
-                    console.error('Service Worker registration failed:', error);
+                    console.error('[App] Service Worker registration failed:', error);
                 });
+            
+            // Reload page when new service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    console.log('[App] New service worker activated, reloading page...');
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
         });
     }
 
