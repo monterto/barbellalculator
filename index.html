@@ -2,20 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barbell Calculator</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
 </head>
 <body class="dark">
-    <header>
-        <div class="logo">Barbell<span>Calculator</span></div>
-        <button id="settings-btn" class="icon-btn">⚙️</button>
-    </header>
+    <button id="settings-btn" class="floating-settings-btn" aria-label="Open settings">⚙️</button>
 
     <main>
         <div class="viz-card">
+            <div class="bar-type-label" id="bar-type-label" aria-live="polite"></div>
+            <div class="stats-overlay">
+                <div class="added-weight-display">
+                    <span class="added-value" id="side-weight" aria-live="polite">-</span>
+                    <span class="added-label">total added</span>
+                </div>
+                <div class="total-weight-display">
+                    <span class="total-value" id="total-weight" aria-live="polite">-</span>
+                    <span class="total-unit" id="unit-label">lbs</span>
+                    <span class="total-label">Total Weight</span>
+                </div>
+            </div>
             <svg id="barbell-viz" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
                 <g id="bar-static-parts">
                     <rect x="20" y="130" width="380" height="20" rx="2" fill="#888" />
@@ -33,83 +42,144 @@
             </div>
         </div>
 
-        <div class="stats-container">
-            <div class="main-stat">
-                <span id="total-weight">45.0</span>
-                <small id="unit-label">lbs</small>
-            </div>
-            <div class="sub-stat-label">Total Weight</div>
-            
-            <div id="added-weight-toggle" class="sub-stat clickable-stat" style="margin-top: 15px; cursor: pointer; user-select: none;">
-                <span id="added-weight-label">Added Weight (Per Side)</span>: 
-                <span id="side-weight">0.0</span> <span class="unit-sm">lbs</span>
-            </div>
-            
-            <button id="clear-btn">Clear Bar</button>
-        </div>
+        <button id="clear-btn">Clear Bar</button>
 
         <div class="controls-grid" id="controls-grid"></div>
     </main>
 
-    <div id="settings-modal" class="modal hidden">
+    <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
-                <button id="close-modal">&times;</button>
+                <h3 id="settings-title">Settings</h3>
+                <button id="close-modal" class="modal-close-btn" aria-label="Close settings">&times;</button>
             </div>
-            
             <div class="setting-item">
-                <div class="setting-label-with-info">
-                    <label>Plate Type</label>
-                    <button class="info-btn" data-info="plate-type">ℹ️</button>
-                </div>
+                <label>
+                    Plate & Barbell Type
+                    <button class="info-btn" id="plate-type-info-btn" aria-label="More information about plate and barbell types">i</button>
+                </label>
                 <div class="segmented-control">
                     <button class="plate-type-select" data-plate-type="standard">Standard</button>
                     <button class="plate-type-select" data-plate-type="olympic">Olympic</button>
                 </div>
             </div>
-            
             <div class="setting-item">
-                <div class="setting-label-with-info">
-                    <label>Barbell Type</label>
-                    <button class="info-btn" data-info="barbell-type">ℹ️</button>
-                </div>
+                <label>
+                    Display Units
+                    <button class="info-btn" id="display-unit-info-btn" aria-label="More information about display units">i</button>
+                </label>
                 <div class="segmented-control">
-                    <button class="bar-select" data-bar="men">Men's</button>
-                    <button class="bar-select" data-bar="women">Women's</button>
-                    <button class="bar-select" data-bar="zero">No Bar</button>
+                    <button class="display-unit-select" data-display-unit="lbs">lbs</button>
+                    <button class="display-unit-select" data-display-unit="kg">kg</button>
                 </div>
             </div>
-            
             <div class="setting-item">
-                <div class="setting-label-with-info">
-                    <label>Display Units</label>
-                    <button class="info-btn" data-info="display-units">ℹ️</button>
+                <label>Select Barbell</label>
+                
+                <div class="bar-category-header">
+                    STANDARD BARBELLS
+                    <button class="info-btn" id="standard-bar-info-btn" aria-label="More information about standard barbells">i</button>
                 </div>
+                <div class="bar-selection-list">
+                    <div class="bar-option" data-bar="men">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">Men's</span>
+                            <span class="bar-weight">45 lbs / 20 kg</span>
+                        </div>
+                    </div>
+                    <div class="bar-option" data-bar="women">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">Women's</span>
+                            <span class="bar-weight">33 lbs / 15 kg</span>
+                        </div>
+                    </div>
+                    <div class="bar-option" data-bar="zero">
+                        <div class="radio-circle"></div>
+                        <div class="bar-info">
+                            <span class="bar-name">No Bar</span>
+                            <span class="bar-weight">0 lbs / 0 kg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bar-category-header bar-category-header-spaced">
+                    CUSTOM BARBELLS
+                    <button class="info-btn" id="custom-bar-info-btn" aria-label="More information about custom barbells">i</button>
+                </div>
+                <div id="custom-bar-list" class="bar-selection-list"></div>
+                <button id="add-custom-bar-btn" class="add-custom-bar-btn">
+                    <span class="plus-icon">+</span>
+                    <span>Add Custom Bar</span>
+                </button>
+            </div>
+            <div class="setting-item">
+                <label>
+                    Higher Precision
+                    <button class="info-btn" id="precision-info-btn" aria-label="More information about precision modes">i</button>
+                </label>
                 <div class="segmented-control">
-                    <button class="unit-select" data-unit="lbs">lbs</button>
-                    <button class="unit-select" data-unit="kg">kg</button>
+                    <button class="precision-select" data-precision="false">Off</button>
+                    <button class="precision-select" data-precision="true">On</button>
                 </div>
             </div>
-            
             <div class="setting-item">
-                <label>Inventory (Per Side)</label>
-                <div id="inventory-list" class="inventory-grid"></div>
+                <button class="collapsible-header" id="inventory-toggle">
+                    <span>Plate Inventory (Total)</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div id="inventory-section" class="collapsible-content hidden">
+                    <div id="inventory-list" class="inventory-grid"></div>
+                </div>
             </div>
-            
-            <button id="theme-toggle" class="full-btn">Toggle Theme</button>
+            <div class="setting-item">
+                <label>Theme</label>
+                <div class="segmented-control">
+                    <button class="theme-select" data-theme="light">Light</button>
+                    <button class="theme-select" data-theme="dark">Dark</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Info Modal -->
-    <div id="info-modal" class="modal hidden">
-        <div class="modal-content info-modal-content">
+    <!-- Custom Bar Modal -->
+    <div id="custom-bar-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="custom-bar-title">
+        <div class="modal-content custom-bar-modal-content">
             <div class="modal-header">
-                <h3 id="info-title">Information</h3>
-                <button id="close-info-modal">&times;</button>
+                <h3 id="custom-bar-title">Add Custom Bar</h3>
+                <button id="close-custom-bar-modal" class="modal-close-btn" aria-label="Close custom bar dialog">&times;</button>
             </div>
-            <div id="info-body" class="info-body"></div>
-            <button id="info-ok-btn" class="full-btn">OK</button>
+            <div class="custom-bar-form">
+                <div class="form-group">
+                    <label for="custom-bar-name-input">Bar Name</label>
+                    <input type="text" id="custom-bar-name-input" placeholder="e.g., Trap Bar" maxlength="20" aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="custom-bar-weight-input">Weight</label>
+                    <input type="number" id="custom-bar-weight-input" placeholder="Enter weight" inputmode="decimal" step="0.1" aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <div class="segmented-control" role="radiogroup" aria-label="Weight unit">
+                        <button class="custom-bar-unit-select" data-unit="lbs" role="radio" aria-checked="false">LBS</button>
+                        <button class="custom-bar-unit-select" data-unit="kg" role="radio" aria-checked="false">KG</button>
+                    </div>
+                </div>
+                <button id="save-custom-bar-modal" class="save-custom-bar-btn">Save Custom Bar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Dialog -->
+    <div id="info-dialog" class="info-dialog hidden" role="alertdialog" aria-modal="true" aria-labelledby="info-dialog-title">
+        <div class="info-dialog-content">
+            <div class="info-dialog-header">
+                <h4 id="info-dialog-title">Information</h4>
+                <button id="close-info-dialog" class="dialog-close-btn" aria-label="Close information dialog">&times;</button>
+            </div>
+            <div id="info-dialog-message" class="info-dialog-message"></div>
+            <button id="info-dialog-ok" class="info-dialog-ok-btn">Got it</button>
         </div>
     </div>
 
