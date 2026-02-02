@@ -3,8 +3,27 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Configuration constants
+    const SVG_CONFIG = {
+        PLATE_START_X: 135,
+        CENTER_Y: 140,
+        THICKNESS_BASE: 48,
+        MAX_DIAMETER: 240,
+        PLATE_SPACING: 3,
+        MIN_SMALL_PLATE_WIDTH: 18,
+        MIN_SMALL_PLATE_HEIGHT: 90,
+        SMALL_PLATE_THRESHOLD: 5
+    };
+    
+    const VALIDATION = {
+        MAX_CUSTOM_BAR_WEIGHT: 1000,
+        MIN_CUSTOM_BAR_WEIGHT: 0.1,
+        MAX_INVENTORY: 999,
+        FLOATING_POINT_EPSILON: 0.001
+    };
+    
     const DATA = {
-        standard: {
+        standard: {  // Commercial gym standard plates
             bar: { men: 45, women: 33, zero: 0 },
             plates: {
                 45: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
@@ -15,9 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 5: { dia: 7.9, thick: 1.0, color: 'var(--white)', darkTxt: true },
                 2.5: { dia: 6.5, thick: 0.8, color: '#777', darkTxt: false }
             },
-            list: [45, 35, 25, 15, 10, 5, 2.5]
+            list: [45, 35, 25, 15, 10, 5, 2.5],
+            baseUnit: 'lbs'  // Native unit for standard plates
         },
-        olympic: {
+        olympic: {  // Olympic weightlifting standard plates
             bar: { men: 20, women: 15, zero: 0 },
             plates: {
                 25: { dia: 17.7, thick: 2.2, color: 'var(--red)', darkTxt: false },
@@ -28,81 +48,183 @@ document.addEventListener('DOMContentLoaded', () => {
                 2.5: { dia: 7.5, thick: 1.0, color: '#222', darkTxt: false },
                 1.25: { dia: 6.5, thick: 0.8, color: '#555', darkTxt: false }
             },
-            list: [25, 20, 15, 10, 5, 2.5, 1.25]
-        }
-    };
-
-    const INFO_CONTENT = {
-        'plate-type': {
-            title: 'Plate Type',
-            body: `
-                <p><strong>Standard:</strong> Commercial standard equipment commonly found in gyms. Uses pound-based plate weights (45, 35, 25, 15, 10, 5, 2.5 lbs).</p>
-                <p><strong>Olympic:</strong> Follows Olympic weightlifting standards. Uses kilogram-based plate weights (25, 20, 15, 10, 5, 2.5, 1.25 kg).</p>
-            `
-        },
-        'barbell-type': {
-            title: 'Barbell Type',
-            body: `
-                <p><strong>Men's Bar:</strong> Standard men's barbell (45 lbs / 20 kg)</p>
-                <p><strong>Women's Bar:</strong> Standard women's barbell (33 lbs / 15 kg)</p>
-                <p><strong>No Bar:</strong> Calculate plates only without barbell weight</p>
-            `
-        },
-        'display-units': {
-            title: 'Display Units',
-            body: `
-                <p>This setting converts all displayed weights between pounds (lbs) and kilograms (kg).</p>
-                <p>Choose your preferred unit for viewing weights, regardless of the plate type you've selected. The conversion will be applied automatically.</p>
-            `
+            list: [25, 20, 15, 10, 5, 2.5, 1.25],
+            baseUnit: 'kg'  // Native unit for Olympic plates
         }
     };
 
     let state = {
-        plateType: 'standard',
+        plateType: 'standard',  // 'standard' or 'olympic' - which physical plate set
+        displayUnit: 'lbs',      // 'lbs' or 'kg' - which units to display
         bar: 'men', 
-        displayUnit: 'lbs',
-        theme: 'dark',
+        theme: 'dark', // Will be set by load() based on saved preference or system
         plates: [],
-        addedWeightMode: 'per-side',
         inventory: {
-            standard: { 45: 10, 35: 2, 25: 2, 15: 2, 10: 4, 5: 4, 2.5: 2 },
-            olympic: { 25: 10, 20: 2, 15: 2, 10: 2, 5: 2, 2.5: 2, 1.25: 2 }
-        }
+            standard: { 45: 99, 35: 99, 25: 99, 15: 99, 10: 99, 5: 99, 2.5: 99 },
+            olympic: { 25: 99, 20: 99, 15: 99, 10: 99, 5: 99, 2.5: 99, 1.25: 99 }
+        },
+        customBars: [],
+        highPrecision: false
     };
+    
+    // Counter for generating unique custom bar IDs
+    let customBarIdCounter = 0;
 
-    // Conversion helpers
-    const LBS_TO_KG = 0.453592;
-    const KG_TO_LBS = 2.20462;
-
-    function convert(value, fromUnit, toUnit) {
-        if (fromUnit === toUnit) return value;
-        if (fromUnit === 'lbs' && toUnit === 'kg') return value * LBS_TO_KG;
-        if (fromUnit === 'kg' && toUnit === 'lbs') return value * KG_TO_LBS;
-        return value;
+    function getPreferredTheme() {
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
     }
 
-    function getPlateNativeUnit() {
-        return state.plateType === 'standard' ? 'lbs' : 'kg';
+    function save() {
+        try {
+            localStorage.setItem('barLoaderPro_v3', JSON.stringify(state));
+        } catch (error) {
+            console.error('Failed to save state:', error);
+            // Could add user notification here if needed
+        }
     }
-
-    function save() { localStorage.setItem('barLoaderPro_v4', JSON.stringify(state)); }
     
     function load() {
-        const saved = localStorage.getItem('barLoaderPro_v4');
-        if (saved) {
-            const loaded = JSON.parse(saved);
-            state = { ...state, ...loaded };
+        try {
+            const saved = localStorage.getItem('barLoaderPro_v3');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+            } else {
+                // First time user - use system theme preference
+                state.theme = getPreferredTheme();
+            }
+        } catch (error) {
+            console.error('Failed to load state, using defaults:', error);
+            // Use system theme preference as fallback
+            state.theme = getPreferredTheme();
         }
-        document.body.className = state.theme;
+        
+        // Apply theme using classList to avoid overwriting other classes
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(state.theme);
+    }
+
+    // Weight conversion functions with precision rounding
+    function lbsToKg(lbs) {
+        const kg = lbs / 2.20462;
+        if (state.highPrecision) {
+            // High precision: 0.1 kg increments
+            return Math.round(kg * 10) / 10;
+        } else {
+            // Standard: 0.25 kg increments (practical for weightlifting)
+            return Math.round(kg * 4) / 4;
+        }
+    }
+
+    function kgToLbs(kg) {
+        const lbs = kg * 2.20462;
+        if (state.highPrecision) {
+            // High precision: 0.1 lb increments
+            return Math.round(lbs * 10) / 10;
+        } else {
+            // Standard: 0.5 lb increments (practical for weightlifting)
+            return Math.round(lbs * 2) / 2;
+        }
+    }
+
+    // Convert weight for display based on current display unit
+    function convertForDisplay(weight, fromUnit) {
+        if (fromUnit === state.displayUnit) {
+            return weight; // No conversion needed
+        }
+        if (fromUnit === 'lbs' && state.displayUnit === 'kg') {
+            return lbsToKg(weight);
+        }
+        if (fromUnit === 'kg' && state.displayUnit === 'lbs') {
+            return kgToLbs(weight);
+        }
+        return weight;
+    }
+
+    // Get display label for a plate weight
+    function getPlateDisplayLabel(plateWeight) {
+        const baseUnit = DATA[state.plateType].baseUnit;
+        const displayWeight = convertForDisplay(plateWeight, baseUnit);
+        return `${displayWeight.toFixed(1)} ${state.displayUnit}`;
+    }
+
+    function getCustomBarWeight(customBar, targetUnit) {
+        // Custom bars store weight in their original unit
+        if (customBar.unit === targetUnit) {
+            return customBar.weight;
+        }
+        // Convert if different unit
+        if (targetUnit === 'kg' && customBar.unit === 'lbs') {
+            return lbsToKg(customBar.weight);
+        }
+        if (targetUnit === 'lbs' && customBar.unit === 'kg') {
+            return kgToLbs(customBar.weight);
+        }
+        return customBar.weight;
+    }
+
+    function getCurrentBarName() {
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            if (!customBar) {
+                // Bar was deleted, reset to default
+                console.warn('Selected custom bar not found, resetting to default');
+                state.bar = 'men';
+                save();
+                return getCurrentBarName(); // Recursive call with valid bar
+            }
+            const weight = getCustomBarWeight(customBar, state.displayUnit);
+            return `${customBar.name} (${weight.toFixed(1)} ${state.displayUnit})`;
+        }
+        
+        const config = DATA[state.plateType];
+        const barWeight = config.bar[state.bar];
+        const displayWeight = convertForDisplay(barWeight, config.baseUnit);
+        
+        const barNames = {
+            men: `Men's Bar (${displayWeight.toFixed(1)} ${state.displayUnit})`,
+            women: `Women's Bar (${displayWeight.toFixed(1)} ${state.displayUnit})`,
+            zero: "No Bar (0)"
+        };
+        
+        return barNames[state.bar] || barNames.men; // Fallback to men's
     }
 
     function updateSettingsHighlights() {
-        document.querySelectorAll('.plate-type-select').forEach(btn => 
-            btn.classList.toggle('active', btn.dataset.plateType === state.plateType));
-        document.querySelectorAll('.bar-select').forEach(btn => 
-            btn.classList.toggle('active', btn.dataset.bar === state.bar));
-        document.querySelectorAll('.unit-select').forEach(btn => 
-            btn.classList.toggle('active', btn.dataset.unit === state.displayUnit));
+        // Plate type (Standard/Olympic)
+        document.querySelectorAll('.plate-type-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.plateType === state.plateType);
+        });
+        
+        // Display unit (lbs/kg)
+        document.querySelectorAll('.display-unit-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.displayUnit === state.displayUnit);
+        });
+        
+        // Theme
+        document.querySelectorAll('.theme-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === state.theme);
+        });
+        
+        // Precision
+        document.querySelectorAll('.precision-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.precision === state.highPrecision.toString());
+        });
+        
+        // Update bar options
+        document.querySelectorAll('.bar-option').forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.bar === state.bar);
+        });
+        
+        // Update bar type label on viz
+        const barLabel = document.getElementById('bar-type-label');
+        if (barLabel) {
+            barLabel.textContent = getCurrentBarName();
+        }
     }
 
     function renderPlates() {
@@ -111,124 +233,255 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = DATA[state.plateType].plates;
         const weightList = DATA[state.plateType].list;
         const maxWeight = Math.max(...weightList);
-        const nativeUnit = getPlateNativeUnit();
         
-        let xOffset = 135; 
-        const centerY = 140; 
+        let xOffset = SVG_CONFIG.PLATE_START_X; 
+        const centerY = SVG_CONFIG.CENTER_Y; 
 
         state.plates.forEach(w => {
             const p = config[w];
             
-            const thicknessBase = 48; 
-            let svgW = (w / maxWeight) * thicknessBase;
+            // Validate plate exists in config
+            if (!p) {
+                console.error(`Invalid plate weight: ${w} for plateType ${state.plateType}`);
+                return; // Skip this plate
+            }
             
-            if (w <= 5) svgW = Math.max(svgW, 18);
+            // Scaled up thickness base for better visibility
+            let svgW = (w / maxWeight) * SVG_CONFIG.THICKNESS_BASE;
+            
+            // Make 10 the same width as 15 for better text readability
+            if (w === 10) {
+                const fifteenWeight = state.plateType === 'standard' ? 15 : 10;
+                svgW = (fifteenWeight / maxWeight) * SVG_CONFIG.THICKNESS_BASE;
+            }
+            
+            // Readability: Clamp minimum width for smaller plates
+            if (w <= SVG_CONFIG.SMALL_PLATE_THRESHOLD) {
+                svgW = Math.max(svgW, SVG_CONFIG.MIN_SMALL_PLATE_WIDTH);
+            }
 
-            const maxDia = 240; 
             const isHeavy = w >= 10;
             
-            let svgH = isHeavy ? maxDia : (p.dia * 14);
-            if (w <= 5) svgH = Math.max(svgH, 90);
+            // Readability: Clamp minimum height for smaller plates
+            let svgH = isHeavy ? SVG_CONFIG.MAX_DIAMETER : (p.dia * 14);
+            if (w <= SVG_CONFIG.SMALL_PLATE_THRESHOLD) {
+                svgH = Math.max(svgH, SVG_CONFIG.MIN_SMALL_PLATE_HEIGHT);
+            }
 
             const y = centerY - (svgH / 2);
 
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", xOffset); rect.setAttribute("y", y);
-            rect.setAttribute("width", svgW); rect.setAttribute("height", svgH);
-            rect.setAttribute("fill", p.color); rect.setAttribute("rx", 4);
-            rect.setAttribute("stroke", "rgba(0,0,0,0.4)");
-            rect.setAttribute("stroke-width", "1.5");
+            rect.setAttribute("x", xOffset); 
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", svgW); 
+            rect.setAttribute("height", svgH);
+            rect.setAttribute("fill", p.color); 
+            rect.setAttribute("rx", 4);
+            
+            // Enhanced contrast for dark plates (black and gray)
+            if (p.color === 'var(--black)' || p.color === '#777' || p.color === '#222' || p.color === '#555') {
+                rect.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
+                rect.setAttribute("stroke-width", "1.5");
+            } else {
+                rect.setAttribute("stroke", "rgba(0,0,0,0.4)");
+                rect.setAttribute("stroke-width", "1.5");
+            }
+            
             g.appendChild(rect);
 
-            // Display weight in current display unit
-            const displayWeight = convert(w, nativeUnit, state.displayUnit);
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
             txt.setAttribute("x", xOffset + (svgW / 2)); 
             txt.setAttribute("y", centerY + 7);
             txt.setAttribute("class", `plate-label ${p.darkTxt ? 'label-dark' : ''}`);
             
-            const fontSize = svgW < 20 ? 11 : 16;
+            // Increased text scale for better readability
+            const fontSize = svgW < 20 ? 14 : 20;
             txt.style.fontSize = `${fontSize}px`;
             txt.style.fontWeight = "bold";
-            txt.textContent = displayWeight.toFixed(displayWeight < 10 ? 2 : 1);
+            
+            // Display weight in current display unit (converted if necessary)
+            const baseUnit = DATA[state.plateType].baseUnit;
+            const displayWeight = convertForDisplay(w, baseUnit);
+            txt.textContent = displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1);
+            
             g.appendChild(txt);
 
-            xOffset += svgW + 3;
+            xOffset += svgW + SVG_CONFIG.PLATE_SPACING;
         });
     }
 
-    function updateUI() {
-        const config = DATA[state.plateType];
-        const nativeUnit = getPlateNativeUnit();
-        
-        // Calculate in native units
-        const barWeightNative = config.bar[state.bar];
-        const sideWeightNative = state.plates.reduce((a, b) => a + b, 0);
-        const totalAddedWeightNative = sideWeightNative * 2;
-        const totalNative = barWeightNative + totalAddedWeightNative;
+    function updateControlStates() {
+        // Update button states without rebuilding entire DOM (performance improvement)
+        DATA[state.plateType].list.forEach(w => {
+            const onBar = state.plates.filter(p => p === w).length * 2;
+            const available = state.inventory[state.plateType][w] - onBar;
+            
+            // Find the button for this weight using data attribute
+            const btn = document.querySelector(`.plate-btn[data-weight="${w}"]`);
+            if (btn) {
+                if (available < 2) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.disabled = true;
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.disabled = false;
+                }
+            }
+        });
+    }
 
-        // Convert to display units
-        const total = convert(totalNative, nativeUnit, state.displayUnit);
-        const sideWeight = convert(sideWeightNative, nativeUnit, state.displayUnit);
-        const totalAddedWeight = convert(totalAddedWeightNative, nativeUnit, state.displayUnit);
+    function updateUI(rebuildControls = false) {
+        const config = DATA[state.plateType];
+        let barWeight;
+        
+        // Validate bar type exists
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            if (!customBar) {
+                console.warn('Selected custom bar not found, resetting to default');
+                state.bar = 'men';
+            }
+            barWeight = customBar ? getCustomBarWeight(customBar, state.displayUnit) : config.bar['men'];
+        } else {
+            // Validate standard bar exists
+            if (config.bar[state.bar] === undefined) {
+                console.error(`Invalid bar type: ${state.bar}, resetting to default`);
+                state.bar = 'men';
+            }
+            barWeight = config.bar[state.bar];
+            // Convert bar weight to display unit
+            barWeight = convertForDisplay(barWeight, config.baseUnit);
+        }
+        
+        // Calculate plate weights in base unit first
+        const baseUnit = config.baseUnit;
+        const sideWeight = state.plates.reduce((a, b) => a + b, 0);
+        const totalAddedWeight = sideWeight * 2;
+        
+        // Convert to display unit
+        const displaySideWeight = convertForDisplay(sideWeight, baseUnit);
+        const displayTotalAdded = convertForDisplay(totalAddedWeight, baseUnit);
+        const total = barWeight + displayTotalAdded;
 
         document.getElementById('total-weight').textContent = total.toFixed(1);
         document.getElementById('unit-label').textContent = state.displayUnit;
-        document.querySelectorAll('.unit-sm').forEach(el => el.textContent = state.displayUnit);
-
-        const labelEl = document.getElementById('added-weight-label');
-        const weightEl = document.getElementById('side-weight');
-
-        if (state.addedWeightMode === 'total') {
-            labelEl.textContent = "Added Weight (Total)";
-            weightEl.textContent = totalAddedWeight.toFixed(1);
-        } else {
-            labelEl.textContent = "Added Weight (Per Side)";
-            weightEl.textContent = sideWeight.toFixed(1);
-        }
+        document.getElementById('side-weight').textContent = displayTotalAdded.toFixed(1);
 
         updateSettingsHighlights();
+        
+        // Only rebuild controls when necessary (performance improvement)
+        if (rebuildControls) {
+            buildControls();
+        } else {
+            updateControlStates();
+        }
+        
         renderPlates();
         save();
     }
 
-    document.getElementById('added-weight-toggle').onclick = () => {
-        state.addedWeightMode = state.addedWeightMode === 'per-side' ? 'total' : 'per-side';
-        updateUI();
-    };
+    function renderCustomBars() {
+        const list = document.getElementById('custom-bar-list');
+        list.innerHTML = '';
+        
+        state.customBars.forEach(preset => {
+            const div = document.createElement('div');
+            div.className = `bar-option ${state.bar === preset.id ? 'active' : ''}`;
+            div.dataset.bar = preset.id;
+            
+            const radio = document.createElement('div');
+            radio.className = 'radio-circle';
+            
+            const info = document.createElement('div');
+            info.className = 'bar-info';
+            info.onclick = () => {
+                state.bar = preset.id;
+                state.plates = [];
+                updateUI();
+            };
+            
+            const name = document.createElement('span');
+            name.className = 'bar-name';
+            name.textContent = preset.name;
+            
+            const weight = document.createElement('span');
+            weight.className = 'bar-weight';
+            // Show weight in current display unit with live conversion
+            const displayWeight = getCustomBarWeight(preset, state.displayUnit);
+            weight.textContent = `${displayWeight.toFixed(1)} ${state.displayUnit}`;
+            
+            info.appendChild(name);
+            info.appendChild(weight);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-bar-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                state.customBars = state.customBars.filter(b => b.id !== preset.id);
+                if (state.bar === preset.id) {
+                    state.bar = 'men';
+                }
+                save();
+                renderCustomBars();
+                updateUI();
+            };
+            
+            div.appendChild(radio);
+            div.appendChild(info);
+            div.appendChild(deleteBtn);
+            list.appendChild(div);
+        });
+    }
 
     function buildControls() {
         const grid = document.getElementById('controls-grid');
         grid.innerHTML = '';
-        const nativeUnit = getPlateNativeUnit();
+        const baseUnit = DATA[state.plateType].baseUnit;
         
         DATA[state.plateType].list.forEach(w => {
             const div = document.createElement('div');
             div.className = 'plate-group';
             const btn = document.createElement('button');
             btn.className = 'plate-btn';
+            btn.dataset.weight = w; // Store actual plate weight (in base unit)
             btn.style.backgroundColor = DATA[state.plateType].plates[w].color;
             if(DATA[state.plateType].plates[w].darkTxt) btn.style.color = '#111';
             
-            // Show weight in display units
-            const displayWeight = convert(w, nativeUnit, state.displayUnit);
-            btn.textContent = displayWeight.toFixed(displayWeight < 10 ? 2 : 1);
+            // Display weight in current display unit
+            const displayWeight = convertForDisplay(w, baseUnit);
+            btn.textContent = displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1);
+            
+            // Count how many of this plate are currently on the bar (both sides)
+            const onBar = state.plates.filter(p => p === w).length * 2;
+            // Check if at least 2 plates available (need a pair)
+            const available = state.inventory[state.plateType][w] - onBar;
             
             btn.onclick = () => { 
-                state.plates.push(w); 
-                state.plates.sort((a,b)=>b-a); 
-                updateUI(); 
+                if (available >= 2) {
+                    state.plates.push(w); 
+                    state.plates.sort((a,b)=>b-a); 
+                    updateUI(); // Don't rebuild controls, just update states
+                }
             };
             
+            // Disable button if less than 2 available
+            if (available < 2) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.disabled = true;
+            }
+            
             const rem = document.createElement('button');
-            rem.className = 'remove-btn'; 
-            rem.textContent = 'Remove';
+            rem.className = 'remove-btn'; rem.textContent = 'Remove';
             rem.onclick = () => { 
                 const i = state.plates.indexOf(w); 
                 if(i>-1){
                     state.plates.splice(i,1); 
-                    updateUI();
-                } 
+                    updateUI(); // Don't rebuild controls, just update states
+                }
             };
             
             div.append(btn, rem);
@@ -239,83 +492,261 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderInventory() {
         const list = document.getElementById('inventory-list');
         list.innerHTML = '';
-        const nativeUnit = getPlateNativeUnit();
+        const baseUnit = DATA[state.plateType].baseUnit;
         
         DATA[state.plateType].list.forEach(w => {
             const div = document.createElement('div'); 
             div.className = 'inv-item';
             
-            const displayWeight = convert(w, nativeUnit, state.displayUnit);
-            const label = `${displayWeight.toFixed(displayWeight < 10 ? 2 : 1)} ${state.displayUnit}`;
-            div.innerHTML = `<span>${label}</span>`;
+            // Display weight in current display unit
+            const displayWeight = convertForDisplay(w, baseUnit);
+            const displayLabel = `${displayWeight.toFixed(displayWeight % 1 === 0 ? 0 : 1)} ${state.displayUnit}`;
+            div.innerHTML = `<span>${displayLabel}</span>`;
             
             const input = document.createElement('input');
-            input.type = 'number'; 
+            input.type = 'number';
+            input.min = '0';
+            input.max = String(VALIDATION.MAX_INVENTORY);
             input.value = state.inventory[state.plateType][w];
-            input.onchange = (e) => { 
-                state.inventory[state.plateType][w] = parseInt(e.target.value) || 0; 
-                save(); 
+            
+            input.onchange = (e) => {
+                let value = parseInt(e.target.value);
+                
+                // Validate and clamp value
+                if (isNaN(value) || value < 0) {
+                    value = 0;
+                }
+                if (value > VALIDATION.MAX_INVENTORY) {
+                    value = VALIDATION.MAX_INVENTORY;
+                }
+                
+                state.inventory[state.plateType][w] = value;
+                input.value = value; // Update display with clamped value
+                save();
+                updateControlStates(); // Update button states based on new inventory
             };
+            
             div.appendChild(input); 
             list.appendChild(div);
         });
     }
 
-    // Info modal handlers
-    function showInfo(infoKey) {
-        const info = INFO_CONTENT[infoKey];
-        if (!info) return;
-        
-        document.getElementById('info-title').textContent = info.title;
-        document.getElementById('info-body').innerHTML = info.body;
-        document.getElementById('info-modal').classList.remove('hidden');
-    }
-
-    function hideInfo() {
-        document.getElementById('info-modal').classList.add('hidden');
-    }
-
-    document.querySelectorAll('.info-btn').forEach(btn => {
-        btn.onclick = () => showInfo(btn.dataset.info);
-    });
-
-    document.getElementById('close-info-modal').onclick = hideInfo;
-    document.getElementById('info-ok-btn').onclick = hideInfo;
-
-    // Settings modal
     document.getElementById('settings-btn').onclick = () => {
         renderInventory();
+        renderCustomBars();
         updateSettingsHighlights();
         document.getElementById('settings-modal').classList.remove('hidden');
+        document.body.classList.add('settings-open');
+        
+        // Focus first button for keyboard accessibility
+        setTimeout(() => {
+            const firstButton = document.querySelector('#settings-modal .unit-select');
+            if (firstButton) firstButton.focus();
+        }, 100);
+        
+        // Push state for back button support
+        window.history.pushState({ modal: 'settings' }, '');
     };
+    
+    function closeSettingsModal() {
+        document.getElementById('settings-modal').classList.add('hidden');
+        document.body.classList.remove('settings-open');
+    }
     
     document.getElementById('close-modal').onclick = () => {
-        document.getElementById('settings-modal').classList.add('hidden');
+        closeSettingsModal();
+        // Go back in history if we pushed a state
+        if (window.history.state && window.history.state.modal) {
+            window.history.back();
+        }
     };
     
-    // Calculate button
+    document.getElementById('inventory-toggle').onclick = function() {
+        const content = document.getElementById('inventory-section');
+        const isHidden = content.classList.contains('hidden');
+        
+        if (isHidden) {
+            content.classList.remove('hidden');
+            content.classList.add('show');
+            this.classList.add('active');
+        } else {
+            content.classList.remove('show');
+            content.classList.add('hidden');
+            this.classList.remove('active');
+        }
+    };
+    
+    // Custom bar modal handlers
+    let selectedCustomBarUnit = 'lbs';
+    
+    document.getElementById('add-custom-bar-btn').onclick = () => {
+        selectedCustomBarUnit = state.displayUnit; // Default to current display unit
+        document.getElementById('custom-bar-modal').classList.remove('hidden');
+        document.getElementById('custom-bar-name-input').value = '';
+        document.getElementById('custom-bar-weight-input').value = '';
+        
+        // Update unit selection and ARIA states
+        document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
+            const isActive = btn.dataset.unit === selectedCustomBarUnit;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-checked', isActive.toString());
+        });
+        
+        // Focus first input for accessibility
+        setTimeout(() => {
+            document.getElementById('custom-bar-name-input').focus();
+        }, 100);
+        
+        // Push state for back button support
+        window.history.pushState({ modal: 'customBar' }, '');
+    };
+    
+    function closeCustomBarModal() {
+        document.getElementById('custom-bar-modal').classList.add('hidden');
+    }
+    
+    document.getElementById('close-custom-bar-modal').onclick = () => {
+        closeCustomBarModal();
+        // Go back in history if we pushed a state
+        if (window.history.state && window.history.state.modal) {
+            window.history.back();
+        }
+    };
+    
+    // Handle browser back button
+    window.addEventListener('popstate', (event) => {
+        // Check what's open and close in order
+        const settingsModal = document.getElementById('settings-modal');
+        const customBarModal = document.getElementById('custom-bar-modal');
+        const infoDialog = document.getElementById('info-dialog');
+        
+        // If info dialog is open, close it (it doesn't participate in history)
+        // and don't process the back action further - let the modal stay open
+        if (!infoDialog.classList.contains('hidden')) {
+            closeInfoDialog();
+            // Re-push the current modal state since back button removed it
+            if (!customBarModal.classList.contains('hidden')) {
+                window.history.pushState({ modal: 'customBar' }, '');
+            } else if (!settingsModal.classList.contains('hidden')) {
+                window.history.pushState({ modal: 'settings' }, '');
+            }
+            return; // Don't close the modal
+        }
+        
+        // If info dialog wasn't open, proceed with normal back button behavior
+        if (!customBarModal.classList.contains('hidden')) {
+            closeCustomBarModal();
+        } else if (!settingsModal.classList.contains('hidden')) {
+            closeSettingsModal();
+        }
+    });
+    
+    document.querySelectorAll('.custom-bar-unit-select').forEach(btn => {
+        btn.onclick = () => {
+            selectedCustomBarUnit = btn.dataset.unit;
+            document.querySelectorAll('.custom-bar-unit-select').forEach(b => {
+                const isActive = b.dataset.unit === selectedCustomBarUnit;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-checked', isActive.toString());
+            });
+        };
+    });
+    
+    document.getElementById('save-custom-bar-modal').onclick = () => {
+        const name = document.getElementById('custom-bar-name-input').value.trim();
+        const weight = parseFloat(document.getElementById('custom-bar-weight-input').value);
+        
+        // Validate name
+        if (!name) {
+            alert('Please enter a bar name');
+            document.getElementById('custom-bar-name-input').focus();
+            return;
+        }
+        
+        if (name.length > 20) {
+            alert('Bar name must be 20 characters or less');
+            document.getElementById('custom-bar-name-input').focus();
+            return;
+        }
+        
+        // Check for duplicate names (case-insensitive)
+        if (state.customBars.some(b => b.name.toLowerCase() === name.toLowerCase())) {
+            alert('A bar with this name already exists. Please choose a different name.');
+            document.getElementById('custom-bar-name-input').focus();
+            return;
+        }
+        
+        // Validate weight
+        if (isNaN(weight)) {
+            alert('Please enter a valid weight');
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        if (weight <= VALIDATION.MIN_CUSTOM_BAR_WEIGHT) {
+            alert(`Weight must be greater than ${VALIDATION.MIN_CUSTOM_BAR_WEIGHT}`);
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        if (weight > VALIDATION.MAX_CUSTOM_BAR_WEIGHT) {
+            alert(`Weight must be ${VALIDATION.MAX_CUSTOM_BAR_WEIGHT} or less`);
+            document.getElementById('custom-bar-weight-input').focus();
+            return;
+        }
+        
+        // Create preset with unique ID
+        const preset = {
+            id: `custom-${Date.now()}-${customBarIdCounter++}`,
+            name: name,
+            weight: weight,
+            unit: selectedCustomBarUnit
+        };
+        
+        state.customBars.push(preset);
+        save();
+        renderCustomBars();
+        
+        // Close modal and clear history if needed
+        document.getElementById('custom-bar-modal').classList.add('hidden');
+        if (window.history.state && window.history.state.modal === 'customBar') {
+            window.history.back();
+        }
+    };
+    
     document.getElementById('calc-btn').onclick = () => {
-        const targetDisplay = parseFloat(document.getElementById('target-weight-input').value);
-        if (isNaN(targetDisplay)) return;
+        const target = parseFloat(document.getElementById('target-weight-input').value);
         
-        const nativeUnit = getPlateNativeUnit();
+        let barWeight;
         const config = DATA[state.plateType];
+        const baseUnit = config.baseUnit;
         
-        // Convert target from display units to native units
-        const target = convert(targetDisplay, state.displayUnit, nativeUnit);
-        const bar = config.bar[state.bar];
+        if (state.bar.startsWith('custom-')) {
+            const customBar = state.customBars.find(b => b.id === state.bar);
+            barWeight = customBar ? getCustomBarWeight(customBar, baseUnit) : 0;
+        } else {
+            barWeight = config.bar[state.bar];
+        }
         
-        if (target < bar) return;
+        // Convert target weight to base unit if user entered it in display unit
+        let targetInBaseUnit = target;
+        if (state.displayUnit !== baseUnit) {
+            targetInBaseUnit = state.displayUnit === 'lbs' ? lbsToKg(target) : kgToLbs(target);
+        }
         
-        let rem = (target - bar) / 2;
+        if (isNaN(targetInBaseUnit) || targetInBaseUnit < barWeight) return;
+        
+        let rem = (targetInBaseUnit - barWeight) / 2;
         const result = [];
         const inv = { ...state.inventory[state.plateType] };
         
         DATA[state.plateType].list.forEach(w => {
-            while (rem >= w && inv[w] > 0) { 
+            // Only add plates if we have at least 2 available (for both sides)
+            // Use epsilon for floating point comparison
+            while (rem >= w - VALIDATION.FLOATING_POINT_EPSILON && inv[w] >= 2) { 
                 result.push(w); 
-                rem = Math.round((rem-w)*100)/100; 
-                inv[w]--; 
+                rem = Math.round((rem - w) * 1000) / 1000; // Higher precision rounding
+                inv[w] -= 2; // Remove a pair
             }
         });
         
@@ -323,52 +754,204 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     };
 
-    // Theme togglea
-    document.getElementById('theme-toggle').onclick = () => {
-        state.theme = state.theme === 'light' ? 'dark' : 'light';
-        document.body.className = state.theme; 
-        save();
-    };
-
-    // Plate type selection
+    // Plate Type selector (Standard/Olympic)
     document.querySelectorAll('.plate-type-select').forEach(b => b.onclick = (e) => {
         const newPlateType = e.target.dataset.plateType;
-        const oldNativeUnit = getPlateNativeUnit();
+        if (newPlateType === state.plateType) return; // No change
         
         state.plateType = newPlateType;
-        const newNativeUnit = getPlateNativeUnit();
+        state.plates = []; // Clear plates when switching type
         
-        // Auto-switch display unit to match new plate type default
-        state.displayUnit = newNativeUnit;
+        // Auto-set display unit to match plate type default
+        state.displayUnit = DATA[newPlateType].baseUnit;
         
-        state.plates = [];
-        buildControls(); 
         renderInventory(); 
-        updateUI();
+        renderCustomBars();
+        updateUI(true); // Rebuild controls since plate type changed
     });
 
-    // Display unit selection
-    document.querySelectorAll('.unit-select').forEach(b => b.onclick = (e) => {
-        state.displayUnit = e.target.dataset.unit;
-        buildControls();
-        renderInventory();
-        updateUI();
+    // Display Unit selector (lbs/kg)
+    document.querySelectorAll('.display-unit-select').forEach(b => b.onclick = (e) => {
+        state.displayUnit = e.target.dataset.displayUnit;
+        renderInventory(); // Update inventory labels
+        renderCustomBars(); // Update custom bar labels
+        updateUI(true); // Rebuild controls to show new units
     });
 
-    // Barbell type selection
-    document.querySelectorAll('.bar-select').forEach(b => b.onclick = (e) => {
-        state.bar = e.target.dataset.bar;
-        updateUI();
+    document.querySelectorAll('.theme-select').forEach(b => b.onclick = (e) => {
+        state.theme = e.target.dataset.theme;
+        // Use classList to avoid overwriting other classes like 'settings-open'
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(state.theme);
+        updateSettingsHighlights();
+        save();
     });
 
-    // Clear button
-    document.getElementById('clear-btn').onclick = () => { 
-        state.plates = []; 
-        updateUI(); 
+    // Info dialog system
+    const infoMessages = {
+        plateType: {
+            title: "Plate & Barbell Type",
+            message: "<strong>Standard:</strong> Commercial gym standard equipment. Uses 45lb, 35lb, 25lb, 15lb, 10lb, 5lb, and 2.5lb plates. Men's bar is 45lbs, Women's bar is 33lbs.<br><br><strong>Olympic:</strong> Follows Olympic weightlifting standards. Uses 25kg, 20kg, 15kg, 10kg, 5kg, 2.5kg, and 1.25kg plates. Men's bar is 20kg, Women's bar is 15kg."
+        },
+        displayUnit: {
+            title: "Display Units",
+            message: "This setting converts the displayed weights between pounds (lbs) and kilograms (kg).<br><br>The conversion happens automatically - your plate selection stays the same, just shown in different units.<br><br><strong>Standard plates</strong> default to lbs display.<br><br><strong>Olympic plates</strong> default to kg display."
+        },
+        standardBar: {
+            title: "Standard Barbells",
+            message: "<strong>Men's:</strong> 45 lbs / 20 kg<br><br><strong>Women's:</strong> 33 lbs / 15 kg<br><br><strong>No Bar:</strong> 0 lbs / 0 kg"
+        },
+        customBar: {
+            title: "Custom Barbells",
+            message: "Custom bars automatically convert between units. A 60 lb bar will show as 27.25 kg when switching to KG mode (or 27.2 kg with Higher Precision enabled)."
+        },
+        precision: {
+            title: "Higher Precision",
+            message: "<strong>Off:</strong> Rounds to nearest 0.5 lb / 0.25 kg (practical for most gym plates)<br><br><strong>On:</strong> Shows 0.1 lb / 0.1 kg precision (useful for exact conversions)"
+        }
     };
 
-    // Initialize
+    function showInfoDialog(title, message) {
+        const dialog = document.getElementById('info-dialog');
+        const titleEl = document.getElementById('info-dialog-title');
+        const messageEl = document.getElementById('info-dialog-message');
+        
+        titleEl.textContent = title;
+        messageEl.innerHTML = message;
+        dialog.classList.remove('hidden');
+        
+        // Focus the OK button for keyboard accessibility
+        setTimeout(() => {
+            document.getElementById('info-dialog-ok').focus();
+        }, 100);
+        
+        // Don't push history state - info dialog is just a simple overlay
+        // that should close without affecting navigation
+    }
+
+    function closeInfoDialog() {
+        document.getElementById('info-dialog').classList.add('hidden');
+    }
+
+    // Trap focus within modals for accessibility
+    function trapFocus(element) {
+        const focusableElements = element.querySelectorAll(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        
+        if (focusableElements.length === 0) return;
+        
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        const handleTabKey = (e) => {
+            if (e.key === 'Tab') {
+                if (e.shiftKey && document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                } else if (!e.shiftKey && document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            } else if (e.key === 'Escape') {
+                // Close modal on Escape key
+                if (element.id === 'settings-modal') {
+                    closeSettingsModal();
+                    if (window.history.state && window.history.state.modal) {
+                        window.history.back();
+                    }
+                } else if (element.id === 'custom-bar-modal') {
+                    closeCustomBarModal();
+                    if (window.history.state && window.history.state.modal) {
+                        window.history.back();
+                    }
+                } else if (element.id === 'info-dialog') {
+                    closeInfoDialog();
+                }
+            }
+        };
+
+        element.addEventListener('keydown', handleTabKey);
+    }
+
+    // Enable focus trapping for all modals
+    trapFocus(document.getElementById('settings-modal'));
+    trapFocus(document.getElementById('custom-bar-modal'));
+    trapFocus(document.getElementById('info-dialog'));
+
+    document.getElementById('close-info-dialog').onclick = () => {
+        closeInfoDialog();
+    };
+
+    document.getElementById('info-dialog-ok').onclick = () => {
+        closeInfoDialog();
+    };
+
+    document.getElementById('plate-type-info-btn').onclick = () => {
+        showInfoDialog(infoMessages.plateType.title, infoMessages.plateType.message);
+    };
+
+    document.getElementById('display-unit-info-btn').onclick = () => {
+        showInfoDialog(infoMessages.displayUnit.title, infoMessages.displayUnit.message);
+    };
+
+    document.getElementById('precision-info-btn').onclick = () => {
+        showInfoDialog(infoMessages.precision.title, infoMessages.precision.message);
+    };
+
+    document.getElementById('standard-bar-info-btn').onclick = () => {
+        showInfoDialog(infoMessages.standardBar.title, infoMessages.standardBar.message);
+    };
+
+    document.getElementById('custom-bar-info-btn').onclick = () => {
+        showInfoDialog(infoMessages.customBar.title, infoMessages.customBar.message);
+    };
+
+    // Bar selection click handler - scoped to settings modal for performance
+    const settingsModal = document.getElementById('settings-modal');
+    settingsModal.addEventListener('click', (e) => {
+        const barOption = e.target.closest('.bar-option');
+        if (barOption && !e.target.classList.contains('delete-bar-btn')) {
+            const barId = barOption.dataset.bar;
+            
+            // Validate bar exists before selecting
+            if (barId) {
+                const isValidStandardBar = DATA[state.plateType].bar[barId] !== undefined;
+                const isValidCustomBar = state.customBars.some(b => b.id === barId);
+                
+                if (isValidStandardBar || isValidCustomBar) {
+                    state.bar = barId;
+                    state.plates = [];
+                    updateUI();
+                } else {
+                    console.warn(`Invalid bar selected: ${barId}`);
+                }
+            }
+        }
+    });
+
+    document.querySelectorAll('.precision-select').forEach(b => b.onclick = (e) => {
+        state.highPrecision = e.target.dataset.precision === 'true';
+        renderCustomBars(); // Re-render to update displayed weights
+        updateUI();
+    });
+
+    document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
+
+    // Register service worker for offline support (PWA)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered successfully:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        });
+    }
+
+    // Initialize app
     load();
-    buildControls();
-    updateUI();
+    updateUI(true); // Initial render - this will call buildControls()
 });
