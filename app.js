@@ -983,21 +983,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('clear-btn').onclick = () => { state.plates = []; updateUI(); };
 
-    // Register service worker for offline support (PWA) with auto-update
+    // Register service worker for offline support (PWA)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('[App] Service Worker registered:', registration.scope);
                     
-                    // Check for updates periodically (every 60 seconds when page is active)
-                    setInterval(() => {
-                        registration.update().then(() => {
-                            console.log('[App] Checked for service worker updates');
-                        });
-                    }, 60000);
-                    
-                    // Handle updates
+                    // Handle updates when user manually refreshes or revisits
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         console.log('[App] New service worker found, installing...');
@@ -1005,7 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                 // New version available
-                                console.log('[App] New version available! Activating...');
+                                console.log('[App] New version available! Will activate on next page load.');
                                 // Tell the new service worker to skip waiting
                                 newWorker.postMessage({ type: 'SKIP_WAITING' });
                             }
