@@ -288,6 +288,17 @@ main {
     box-shadow: 0 2px 8px var(--shadow);
 }
 
+/* Feedback under "Load" when the target can't be hit exactly */
+.calc-note {
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+}
+.calc-note:empty {
+    display: none;
+}
+
 .target-input-card label {
     display: block;
     font-weight: 700;
