@@ -1041,11 +1041,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register service worker for offline support (PWA)
     if ('serviceWorker' in navigator) {
+        // Only reload when an existing version is being REPLACED (not on the
+        // very first visit, when there's nothing to replace).
+        const hadController = !!navigator.serviceWorker.controller;
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('[App] Service Worker registered:', registration.scope);
-                    
+
+                    // Installed apps are often resumed from the background
+                    // instead of reloaded, so check for a new version whenever
+                    // the app is opened or brought back to the front.
+                    registration.update();
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') registration.update();
+                    });
+
                     // Handle updates when user manually refreshes or revisits
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
@@ -1068,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reload page when new service worker takes control
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
+                if (!refreshing && hadController) {
                     console.log('[App] New service worker activated, reloading page...');
                     refreshing = true;
                     window.location.reload();
