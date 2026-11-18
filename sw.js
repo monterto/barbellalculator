@@ -1,4 +1,4 @@
-const cacheName = 'barcalc-v5'; // Increment version for new deployment
+const cacheName = 'barcalc-v6'; // Increment version for new deployment
 const staticAssets = [
   './',
   './index.html',
@@ -13,7 +13,10 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(cacheName).then(cache => {
       console.log('[ServiceWorker] Caching app shell');
-      return cache.addAll(staticAssets);
+      // `cache: 'reload'` = always download fresh copies. GitHub Pages lets
+      // phones reuse files for 10 minutes, so without it a new version could
+      // be stored with the OLD files and stay stuck on them.
+      return cache.addAll(staticAssets.map(url => new Request(url, { cache: 'reload' })));
     }).then(() => {
       console.log('[ServiceWorker] Skip waiting');
       return self.skipWaiting(); // Activate immediately
@@ -59,8 +62,10 @@ async function staleWhileRevalidate(req) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
   
-  // Fetch fresh version in background
-  const fetchPromise = fetch(req).then(fresh => {
+  // Fetch fresh version in background. `no-cache` asks GitHub for the latest
+  // copy instead of reusing the phone's 10-minute download cache — otherwise
+  // the "refresh" could just re-store the same old file.
+  const fetchPromise = fetch(req.method === 'GET' ? new Request(req.url, { cache: 'no-cache' }) : req).then(fresh => {
     // Only cache successful GETs — caching a 404/500 would keep serving the
     // error from cache, and cache.put() throws for non-GET requests.
     if (req.method === 'GET' && fresh.ok) {
