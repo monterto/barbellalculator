@@ -116,7 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
+                // Shallow-merge the top level, but merge inventory per plate type
+                // so a save missing one type (or one plate size) still gets defaults
+                // instead of crashing on state.inventory[plateType][w].
+                const defaultInventory = state.inventory;
                 state = { ...state, ...parsed };
+                const savedInv = (parsed.inventory && typeof parsed.inventory === 'object') ? parsed.inventory : {};
+                state.inventory = {
+                    standard: { ...defaultInventory.standard, ...(savedInv.standard || {}) },
+                    olympic: { ...defaultInventory.olympic, ...(savedInv.olympic || {}) }
+                };
+                if (!Array.isArray(state.plates)) state.plates = [];
+                if (!Array.isArray(state.customBars)) state.customBars = [];
+                if (!DATA[state.plateType]) state.plateType = 'standard';
             } else {
                 // First time user - use system theme preference
                 state.theme = getPreferredTheme();
@@ -339,6 +351,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             xOffset += svgW + SVG_CONFIG.PLATE_SPACING;
         });
+
+        // Heavy loads (roughly 7+ big plates per side) used to run off the
+        // right edge of the drawing, hiding the smaller plates at the end.
+        // Shrink the whole stack around the collar so every plate stays visible.
+        const maxRight = 495; // viewBox is 500 wide
+        if (xOffset > maxRight) {
+            const start = SVG_CONFIG.PLATE_START_X;
+            const k = (maxRight - start) / (xOffset - start);
+            g.setAttribute('transform', `translate(${start} ${centerY}) scale(${k}) translate(${-start} ${-centerY})`);
+        } else {
+            g.removeAttribute('transform');
+        }
     }
 
     function updateControlStates() {
@@ -495,9 +519,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const onBar = state.plates.filter(p => p === w).length * 2;
             // Check if at least 2 plates available (need a pair)
             const available = state.inventory[state.plateType][w] - onBar;
-            
-            btn.onclick = () => { 
-                if (available >= 2) {
+
+            btn.onclick = () => {
+                // Recompute at click time: `available` above is a snapshot from
+                // when the buttons were built, and goes stale as plates are added.
+                const nowOnBar = state.plates.filter(p => p === w).length * 2;
+                if (state.inventory[state.plateType][w] - nowOnBar >= 2) {
                     state.plates.push(w); 
                     state.plates.sort((a,b)=>b-a); 
                     updateUI(); // Don't rebuild controls, just update states
@@ -585,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Focus first button for keyboard accessibility
         setTimeout(() => {
-            const firstButton = document.querySelector('#settings-modal .unit-select');
+            const firstButton = document.querySelector('#settings-modal .plate-type-select');
             if (firstButton) firstButton.focus();
         }, 100);
         
@@ -779,8 +806,18 @@ document.addEventListener('DOMContentLoaded', () => {
             targetInBaseUnit = state.displayUnit === 'lbs' ? lbsToKg(target) : kgToLbs(target);
         }
         
-        if (isNaN(targetInBaseUnit) || targetInBaseUnit < barWeight) return;
-        
+        const note = document.getElementById('calc-note');
+        if (isNaN(target)) {
+            note.textContent = '';
+            return;
+        }
+        if (targetInBaseUnit < barWeight) {
+            // Used to return silently, which looked like the button was broken.
+            const barDisplay = convertForDisplay(barWeight, baseUnit);
+            note.textContent = `Target is less than the bar itself (${formatWeight(barDisplay)} ${state.displayUnit}).`;
+            return;
+        }
+
         let rem = (targetInBaseUnit - barWeight) / 2;
         const result = [];
         const inv = { ...state.inventory[state.plateType] };
@@ -795,9 +832,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        state.plates = result; 
+        state.plates = result;
         updateUI();
+
+        // If plates (or inventory) couldn't make the exact target, say so
+        // instead of silently loading less. Compare in the units shown.
+        const loadedTotal = parseFloat(document.getElementById('total-weight').textContent);
+        // Two decimals so a 1.25 kg gap reads "1.25", not "1.3".
+        const shortBy = Math.round((target - loadedTotal) * 100) / 100;
+        // When showing converted units (e.g. lb plates displayed in kg), the
+        // displayed total carries its own rounding, so allow a bit of slack.
+        const tolerance = state.displayUnit === baseUnit ? 0.1 : 0.5;
+        if (shortBy >= tolerance) {
+            note.textContent = `Can't make exactly ${formatWeight(target)} ${state.displayUnit} with these plates. Loaded ${formatWeight(loadedTotal)} (${formatWeight(shortBy)} short).`;
+        } else {
+            note.textContent = '';
+        }
     };
+
+    // Clear the note as soon as the target changes so it never describes a stale load.
+    document.getElementById('target-weight-input').addEventListener('input', () => {
+        document.getElementById('calc-note').textContent = '';
+    });
 
     // Plate Type selector (Standard/Olympic)
     document.querySelectorAll('.plate-type-select').forEach(b => b.onclick = (e) => {

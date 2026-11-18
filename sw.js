@@ -1,4 +1,4 @@
-const cacheName = 'barcalc-v3'; // Increment version for new deployment
+const cacheName = 'barcalc-v5'; // Increment version for new deployment
 const staticAssets = [
   './',
   './index.html',
@@ -61,8 +61,11 @@ async function staleWhileRevalidate(req) {
   
   // Fetch fresh version in background
   const fetchPromise = fetch(req).then(fresh => {
-    // Update cache with fresh version
-    cache.put(req, fresh.clone());
+    // Only cache successful GETs — caching a 404/500 would keep serving the
+    // error from cache, and cache.put() throws for non-GET requests.
+    if (req.method === 'GET' && fresh.ok) {
+      cache.put(req, fresh.clone());
+    }
     return fresh;
   }).catch(() => cached); // Fallback to cached on network error
   
